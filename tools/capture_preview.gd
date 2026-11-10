@@ -45,6 +45,20 @@ func capture() -> void:
 	game.player.cooldown = 0
 	game.player.fire_at(Vector2(875, 640))
 	await save_frame("res://docs/combat.png")
+	var locker = game.get_tree().get_nodes_in_group("containers").filter(func(n: Node) -> bool: return n.kind == "locker")[0]
+	game.player.position = locker.position + Vector2(0, 42)
+	game.player.camera.reset_smoothing()
+	locker.interact(game.player)
+	await create_timer(.3).timeout
+	await save_frame("res://docs/inventory.png")
+	game.close_inventory()
+	game.toggle_map()
+	await save_frame("res://docs/map.png")
+	game.toggle_map()
+	game.player.position = Vector2(3175, 2320)
+	game.player.camera.reset_smoothing()
+	await create_timer(.5).timeout
+	await save_frame("res://docs/industry.png")
 	game.toggle_pause()
 	await save_frame("res://docs/pause.png")
 	game.queue_free()

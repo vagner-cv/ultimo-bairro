@@ -23,8 +23,9 @@ var memory: float = 0.0
 var idle_animation: float = 0.0
 
 func _ready() -> void:
+	material = preload("res://shaders/soft_pixel.tres")
 	collision_layer = 4
-	collision_mask = 1 | 2 | 4 | 8
+	collision_mask = 1 | 2 | 4 | 8 | 16
 	add_to_group("zombies")
 	var collision := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
@@ -34,7 +35,7 @@ func _ready() -> void:
 	add_child(collision)
 	wander_timer = randf_range(.5, 4)
 	think_timer = randf_range(0, .5)
-	speed = randf_range(37, 49)
+	speed = randf_range(37, 49) + minf(18, (game.wave - 1) * 1.5)
 	tint = Color.from_hsv(randf_range(.05, .13), randf_range(.02, .16), randf_range(.8, 1))
 
 func _physics_process(delta: float) -> void:
@@ -100,7 +101,7 @@ func hear(at: Vector2, radius: float) -> void:
 		memory = 8
 		think_timer = 0
 
-func take_damage(amount: int, direction: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: int, direction: Vector2 = Vector2.ZERO, _damage_kind: String = "bullet") -> void:
 	if state == State.DEAD:
 		return
 	health = maxi(0, health - amount)
@@ -114,11 +115,11 @@ func take_damage(amount: int, direction: Vector2 = Vector2.ZERO) -> void:
 		collision_layer = 0
 		collision_mask = 0
 		game.effects.corpse(global_position, Color("647767") * tint)
-		game.zombie_killed()
+		game.zombie_killed(global_position)
 		queue_free()
 
 func _draw() -> void:
-	draw_circle(Vector2(0, -3), 10, Color(0.015, .04, .035, .3))
+	preload("res://src/systems/shadows.gd").draw_contact(self, Vector2(5, -3), Vector2(35, 17))
 	var color := Color(1.6, 1.4, 1.2) if flash > 0 else tint
 	var moving := velocity.length_squared() > 4
 	var texture: Texture2D = KIT.ZOMBIE_WALK if moving else KIT.ZOMBIE_IDLE

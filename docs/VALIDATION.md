@@ -1,34 +1,17 @@
-# Validação da entrega 0.2.0
+# Validação da versão 0.3.0
 
-Validado em 10 de novembro de 2026, com Godot 4.6.3 Standard, em Linux x64.
+80/80 verificações em `tests/run_tests.gd`: movimentação normalizada, paredes,
+portas e navegação, tiro/oclusão, perseguição/ataque, diálogo, pausa, morte,
+reinício, ondas automáticas, mapa ampliado, inventário sem limite, transações
+atômicas, cura, munições independentes, armas não possuídas, recipientes
+persistentes, pegar/guardar parcial/tudo, equipar/fallback de arma, faca e
+caixas, remoção de colisão, loot aleatório, salto e apoio, mapa/inventário.
 
-A revisão 0.2.0 integra o kit pronto gratuito da CraftPix, incluindo tiles,
-objetos e animações nativas. Os PNGs são preparados a partir do arquivo do autor,
-com verificação de SHA-256. As capturas mostram esse kit dentro do jogo.
+`tools/capture_preview.gd` captura título, interior, exterior, combate,
+diálogo, inventário, mapa, indústria e pausa no renderer Compatibility.
 
-## Verificações concluídas
-
-- Importação e execução de uma cópia limpa do projeto, sem cache `.godot`.
-- **32/32 testes de gameplay aprovados**, sem erros de script ou recursos.
-- Exportação release para Windows x64 e Linux x64, com pacote embutido.
-- Verificação de integridade dos ZIPs gerados.
-- Inspeção visual de menu, interior, bairro, diálogo, combate e pausa.
-- Teste do executável Linux com eventos reais de teclado e mouse em X11:
-  iniciar pelo menu, abrir a porta, caminhar até Mara, conversar, atirar,
-  pausar, reiniciar e sair. Encerramento com código 0 e sem erros no log.
-- Sintaxe das ferramentas Python e leitura do YAML da pipeline verificadas.
-
-O teste visual usa renderização por software Mesa/llvmpipe em uma tela virtual.
-O aviso de V-Sync indisponível nesse driver não é usado para avaliar o hardware
-alvo do jogo. Ainda não foi medido o desempenho em um PC representativo.
-
-## Limites desta validação
-
-O executável Windows foi exportado e seu formato PE x64 foi verificado, mas
-não foi executado em Windows. Não há uma sessão Windows neste ambiente.
-A pipeline do GitHub prepara os assets e executa as verificações em cada push.
-O estado de cada commit fica na aba Actions do repositório privado:
-https://github.com/vagner-cv/ultimo-bairro/actions.
-
-Os logs e capturas do teste nativo ficam em `builds/`, fora do histórico Git.
-As capturas de referência do projeto estão nesta pasta `docs/`.
+`tools/smoke_linux_export.py` exercita o executável Linux com eventos reais
+X11: início, I, Tab, pulo, faca, movimentação, porta, NPC, tiro, pausa,
+reinício e saída. Os pacotes Windows/Linux embutem o PCK e os avisos de licença.
+Windows foi exportado em Linux; seu funcionamento nativo precisa ser validado
+em uma máquina Windows. Não foi feita medição em hardware antigo.

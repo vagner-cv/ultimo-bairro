@@ -4,9 +4,12 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "PISTOLA 9 mm"
+display_name = "Pistola 9 mm"
 damage = 34
 cooldown = 0.22
 range_pixels = 600.0
 noise_radius = 490.0
-infinite_ammo = true
+ammo_type = "ammo_9mm"
+pellets = 1
+spread = 0
+icon_id = "pistol"

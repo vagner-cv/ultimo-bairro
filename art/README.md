@@ -1,25 +1,21 @@
-# Arte ativa — versão 0.2.0
+# Arte ativa — versão 0.3.0
 
-O jogo usa o **Free Zombie Apocalypse Top-Down Pixel Art Kit**, da CraftPix:
+O cenário e os infectados usam **Free Zombie Apocalypse Top-Down Pixel Art Kit**, da CraftPix:
 https://free-game-assets.itch.io/free-zombie-apocalypse-top-down-pixel-art-kit
 
-O kit gratuito foi escolhido por reunir terreno, construções, objetos,
-sobreviventes e infectados na mesma escala e paleta. O autor fornece animações
-laterais, que o jogo espelha; a mira é independente em 360 graus.
+`tools/prepare_assets.py` obtém o download gratuito, valida seu SHA-256 e prepara
+os PNGs usados em `art/vendor/craftpix/`, ignorado pelo Git. Os executáveis usam
+os assets embutidos no jogo; o repositório não redistribui o pacote gráfico.
+Licença: https://craftpix.net/file-licenses/ — Freebie Products.
+Veja `CRAFTPIX-NOTICE.txt`, além dos avisos das fontes e do Godot.
 
-`tools/prepare_assets.py` obtém o download gratuito, valida o SHA-256, copia
-os PNGs necessários e recorta regiões do tileset para uso pelo Godot. O terreno
-é montado com tiles do pacote, e os prédios são compostos pelo renderer do jogo.
-Não há geração de imagens nesse processo.
+O usuário pediu Leon de Resident Evil 4 e itens de sobrevivência. Os sprites em
+`art/survival/` foram gerados para este projeto e empacotados em frames/ícones:
+Leon em quatro direções, armas, munições, erva, caixas, armário, gaveteiro e lixeira.
+São representações próprias; nenhum asset foi extraído de Resident Evil.
+Os direitos sobre o personagem e a marca de referência pertencem a seus titulares.
 
-Os arquivos preparados ficam em `art/vendor/craftpix/`, ignorado pelo Git.
-Conforme a licença de freebies da CraftPix, os executáveis usam a arte como
-parte do jogo. O repositório e o ZIP de código fornecem o script de preparação,
-sem redistribuir os arquivos gráficos do pacote.
-
-Licença: https://craftpix.net/file-licenses/ — seção Freebie Products.
-Veja `CRAFTPIX-NOTICE.txt`. Fontes e motor mantêm os respectivos avisos.
-
-As artes anteriores foram substituídas nesta revisão e continuam no histórico
-Git para referência. Os sons próprios podem ser regenerados com
-`python tools/generate_audio.py`.
+`shaders/soft_pixel.gdshader` reconstrói cantos diagonais (Scale2x) em tempo de
+renderização sem alterar as fontes de arte. F2 alterna o filtro suave e a
+apresentação clássica. Sombras de contato usam gradiente radial; prédios e árvores
+têm projeções suaves. Os sons próprios podem ser regenerados por `tools/generate_audio.py`.

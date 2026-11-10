@@ -2,9 +2,8 @@
 
 - Projeto nativo Godot 4.6.3 Standard, GDScript, renderer Compatibility.
 - Idioma do produto e da documentação: português brasileiro.
-- Mantenha a primeira versão focada: um jogador, uma arma infinita, zumbis,
-  portas, um NPC e bairro finito. Novos sistemas precisam fazer parte do pedido.
-- Não ative inventário, coleta, saque, fome/sede ou multiplayer por conta própria.
+- Escopo autorizado 0.3: ondas, inventário sem limite, loot, ervas, três armas
+  com munições próprias, faca, pulo e bairro ampliado. Sem multiplayer/fome/sede.
 - Use o kit pronto documentado em `art/README.md`, preservando sua licença.
   Não adicione assets extraídos dos jogos usados como referência.
 - Use recursos `WeaponData` para os atributos de armas. Atualize a navegação
@@ -21,4 +20,5 @@
 - Evite adicionar bibliotecas e frameworks até haver uma necessidade concreta.
 - Não versione os PNGs/ZIPs da CraftPix nem inclua-os no ZIP de código-fonte.
   Distribua-os embutidos no jogo. As versões anteriores de arte estão no histórico.
-- Não substitua a arte do kit por imagens geradas ou figuras geométricas.
+- Preserve o cenário CraftPix. O usuário autorizou o personagem Leon e novos
+  ícones: use sprites próprios, sem extrair arquivos de Resident Evil.

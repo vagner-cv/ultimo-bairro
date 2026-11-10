@@ -39,7 +39,7 @@ func _draw() -> void:
 				tile = 136
 			elif x == columns - 1:
 				tile = 139
-			KIT.tile(self, tile, Vector2(x * 32, y * 32))
+			KIT.tile(self, tile, Vector2(x * 32, y * 32), Color.WHITE.lerp(roof_color, .18))
 	for x in range(1, columns - 1, 2):
 		if absf(x * 32 - size.x / 2) < 36:
 			continue
@@ -48,4 +48,12 @@ func _draw() -> void:
 	if variant % 2 == 0:
 		KIT.tile(self, 186, Vector2(32, 32))
 		KIT.tile(self, 208, Vector2(32, 64))
+	var font := ThemeDB.fallback_font
+	var label_width := font.get_string_size(house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
+	var plate := Rect2(size.x / 2 - label_width / 2 - 8, size.y - 92, label_width + 16, 19)
+	draw_rect(plate, Color(.08, .13, .12, .91))
+	draw_string(font, plate.position + Vector2(8, 14), house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e5e1cd"))
 	KIT.door(self, Vector2(size.x / 2 - 32, size.y - 64), is_instance_valid(entry) and entry.is_open)
+
+func _ready() -> void:
+	material = preload("res://shaders/soft_pixel.tres")

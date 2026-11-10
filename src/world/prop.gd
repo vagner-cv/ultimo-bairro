@@ -13,6 +13,10 @@ var kind: String = "wall"
 var size: Vector2 = Vector2(32, 32)
 var tint: Color = Color("899280")
 var variant: int = 0
+var platform_height: float = 26
+
+func navigation_rect() -> Rect2:
+	return Rect2(global_position - Vector2(size.x / 2, size.y), size)
 
 func _draw() -> void:
 	if kind == "wall":
@@ -23,7 +27,13 @@ func _draw() -> void:
 				var section := Vector2(minf(32, size.x - x), minf(32, size.y - y))
 				draw_texture_rect_region(KIT.ATLAS, Rect2(Vector2(-size.x / 2 + x, -size.y + y), section), Rect2(16 * 2, 16 * 15, section.x / 2, section.y / 2))
 		return
+	preload("res://src/systems/shadows.gd").draw_contact(self, Vector2(14, -3), Vector2(maxf(40, size.x * 1.5), 22))
 	var texture: Texture2D = ART.get(kind, ART.crate)
+	if kind == "tree":
+		for sample in range(4):
+			draw_set_transform(Vector2(15 + sample * 2, -3), -.4, Vector2(1.15, .35))
+			draw_texture_rect(texture, Rect2(-48, -96, 96, 96), false, Color(.02, .04, .05, .07))
+			draw_set_transform(Vector2.ZERO)
 	if kind in ["fence", "barricade", "bush"]:
 		var native_width := texture.get_width() * 2
 		var native_height := texture.get_height() * 2
@@ -33,3 +43,6 @@ func _draw() -> void:
 	else:
 		var native_size := texture.get_size() * 2
 		draw_texture_rect(texture, Rect2(Vector2(-native_size.x / 2, -native_size.y), native_size), false)
+
+func _ready() -> void:
+	material = preload("res://shaders/soft_pixel.tres")

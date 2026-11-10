@@ -5,8 +5,23 @@ const PLAYER = preload("res://src/actors/player.gd")
 const ZOMBIE = preload("res://src/actors/zombie.gd")
 const HUD = preload("res://src/ui/hud.gd")
 const EFFECTS = preload("res://src/systems/effects.gd")
+const INVENTORY = preload("res://src/systems/inventory.gd")
+const LOOT = preload("res://src/systems/loot.gd")
+const LOOT_BAG = preload("res://src/world/loot_bag.gd")
+const INVENTORY_PANEL = preload("res://src/ui/inventory_panel.gd")
 const AUDIO = preload("res://src/systems/audio.gd")
 
+var inventory: RefCounted
+var inventory_panel: Control
+var inventory_open: bool = false
+var wave: int = 1
+var wave_total: int = 18
+var wave_pending: int = 0
+var wave_countdown: float = -1
+var spawn_timer: float = 0
+var toast_message: String = ""
+var notification_time: float = 0
+var smooth_graphics: bool = true
 var world: Node2D
 var player: CharacterBody2D
 var effects: Node2D
@@ -26,7 +41,7 @@ var started: bool = false
 var quitting: bool = false
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	get_tree().auto_accept_quit = false
 	_setup_inputs()
 	audio = AUDIO.new()
@@ -40,10 +55,13 @@ func _ready() -> void:
 	hud = HUD.new()
 	hud.game = self
 	canvas.add_child(hud)
+	inventory_panel = INVENTORY_PANEL.new()
+	inventory_panel.game = self
+	hud.add_child(inventory_panel)
 	get_tree().paused = true
 
 func _setup_inputs() -> void:
-	var keys := {"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "interact": [KEY_E], "pause_game": [KEY_ESCAPE], "mute": [KEY_M], "fullscreen": [KEY_F11]}
+	var keys := {"move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN], "move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "interact": [KEY_E], "pause_game": [KEY_ESCAPE], "mute": [KEY_M], "fullscreen": [KEY_F11], "inventory": [KEY_I], "map": [KEY_TAB], "knife": [KEY_F], "jump": [KEY_SPACE], "quick_heal": [KEY_H], "graphics": [KEY_F2]}
 	for action: String in keys:
 		if not InputMap.has_action(action):
 			InputMap.add_action(action)
@@ -57,8 +75,20 @@ func _setup_inputs() -> void:
 		var mouse := InputEventMouseButton.new()
 		mouse.button_index = MOUSE_BUTTON_LEFT
 		InputMap.action_add_event("shoot", mouse)
+	var knife_mouse := InputEventMouseButton.new()
+	knife_mouse.button_index = MOUSE_BUTTON_RIGHT
+	InputMap.action_add_event("knife", knife_mouse)
 
 func _build_world() -> void:
+	inventory = INVENTORY.new()
+	inventory.add("pistol")
+	inventory.add("knife")
+	inventory.add("ammo_9mm", 60)
+	inventory.add("herb", 1)
+	wave = 1
+	wave_total = 18
+	wave_pending = 0
+	wave_countdown = -1
 	world = WORLD.new()
 	world.name = "VilaAurora"
 	world.game = self
@@ -72,13 +102,11 @@ func _build_world() -> void:
 	player.position = world.SPAWN
 	world.actors.add_child(player)
 	world.set_player(player)
-	remaining = world.spawn_points.size()
+	remaining = wave_total
 	for at: Vector2 in world.spawn_points:
-		var zombie := ZOMBIE.new()
-		zombie.game = self
-		zombie.position = at
-		world.actors.add_child(zombie)
+		_spawn_zombie(at)
 	player.camera.reset_smoothing()
+	_apply_graphics()
 
 func begin() -> void:
 	started = true
@@ -88,6 +116,10 @@ func begin() -> void:
 	player.cooldown = .28
 
 func restart() -> void:
+	if inventory_open:
+		close_inventory()
+	inventory_panel.hide()
+	notification_time = 0
 	get_tree().paused = false
 	Input.action_release("shoot")
 	nearby = null
@@ -103,6 +135,12 @@ func restart() -> void:
 	begin()
 
 func toggle_pause() -> void:
+	if inventory_open:
+		close_inventory()
+		return
+	if hud.screen == "map":
+		toggle_map()
+		return
 	if hud.screen == "help":
 		hud.show_screen(hud.previous_screen)
 		return
@@ -127,6 +165,17 @@ func _unhandled_input(event: InputEvent) -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED if full else DisplayServer.WINDOW_MODE_FULLSCREEN)
 	elif event.is_action_pressed("mute"):
 		audio.toggle_mute()
+	elif event.is_action_pressed("inventory") and started and player.health > 0:
+		if inventory_open:
+			close_inventory()
+		elif not get_tree().paused and not dialogue_active:
+			open_inventory()
+	elif event.is_action_pressed("map"):
+		toggle_map()
+	elif event.is_action_pressed("graphics"):
+		smooth_graphics = not smooth_graphics
+		_apply_graphics()
+		notify("Filtro suave" if smooth_graphics else "Pixel art clássico")
 	elif event.is_action_pressed("interact") and not get_tree().paused:
 		if dialogue_active:
 			advance_dialogue()
@@ -138,11 +187,13 @@ func _process(delta: float) -> void:
 	if not started or get_tree().paused:
 		return
 	elapsed += delta
+	notification_time = maxf(0, notification_time - delta)
+	_update_waves(delta)
 	nearby = null
 	var nearest_distance := 60.0
 	for item: Node2D in get_tree().get_nodes_in_group("interactables"):
 		var distance := player.global_position.distance_to(item.global_position)
-		if distance < nearest_distance and world.has_line_of_sight(player.global_position + Vector2(0, -8), item.global_position + Vector2(0, -24)):
+		if distance < nearest_distance and can_interact(item):
 			nearest_distance = distance
 			nearby = item
 	# A closed door is itself the ray obstruction; proximity still permits opening.
@@ -180,9 +231,15 @@ func make_noise(at: Vector2, radius: float) -> void:
 	for zombie in get_tree().get_nodes_in_group("zombies"):
 		zombie.hear(at, radius)
 
-func zombie_killed() -> void:
+func zombie_killed(at: Vector2 = Vector2.ZERO) -> void:
 	kills += 1
 	remaining = maxi(0, remaining - 1)
+	var drops = LOOT.roll(world.random, "zombie", wave)
+	if not drops.is_empty():
+		call_deferred("spawn_loot", at, drops)
+	if remaining == 0:
+		wave_countdown = 12
+		notify("Onda %d concluída. Próxima em 12 segundos." % wave)
 
 func game_over() -> void:
 	end_dialogue()
@@ -208,3 +265,100 @@ func _notification(what: int) -> void:
 func _exit_tree() -> void:
 	get_tree().paused = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func notify(message: String) -> void:
+	toast_message = message
+	notification_time = 3.5
+
+func _spawn_zombie(at: Vector2) -> void:
+	var zombie := ZOMBIE.new()
+	zombie.game = self
+	zombie.position = at
+	world.actors.add_child(zombie)
+	if not smooth_graphics:
+		zombie.material = null
+
+func _update_waves(delta: float) -> void:
+	if wave_countdown >= 0:
+		wave_countdown -= delta
+		if wave_countdown <= 0:
+			start_wave(wave + 1)
+	if wave_pending > 0:
+		spawn_timer -= delta
+		if spawn_timer <= 0 and get_tree().get_nodes_in_group("zombies").size() < 42:
+			_spawn_zombie(world.wave_spawn(player.global_position))
+			wave_pending -= 1
+			spawn_timer = .2
+
+func start_wave(number: int) -> void:
+	wave = number
+	wave_total = 18 + (wave - 1) * 8
+	remaining = wave_total
+	wave_pending = wave_total
+	wave_countdown = -1
+	spawn_timer = 0
+	notify("ONDA %d · %d infectados" % [wave, wave_total])
+
+func spawn_loot(at: Vector2, contents: RefCounted) -> Node2D:
+	var bag := LOOT_BAG.new()
+	bag.game = self
+	bag.inventory = contents
+	bag.position = at
+	world.actors.add_child(bag)
+	return bag
+
+func can_interact(item: Node2D) -> bool:
+	var origin := player.global_position + Vector2(0, -8)
+	var endpoint := item.global_position + Vector2(0, -8)
+	var query := PhysicsRayQueryParameters2D.create(origin, endpoint, 1 | 16)
+	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	return hit.is_empty() or hit.collider == item
+
+func open_inventory(container: Node2D = null) -> void:
+	if not started or player.health <= 0 or dialogue_active or inventory_open:
+		return
+	inventory_open = true
+	get_tree().paused = true
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	inventory_panel.open(container)
+
+func close_inventory() -> void:
+	if not inventory_open:
+		return
+	if is_instance_valid(inventory_panel.target):
+		inventory_panel.target.close()
+	inventory_panel.target = null
+	inventory_panel.hide()
+	inventory_open = false
+	get_tree().paused = false
+	player.cooldown = maxf(player.cooldown, .25)
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+
+func use_item(id: String) -> bool:
+	if id != "herb" or player.health <= 0 or player.health >= 100:
+		return false
+	if not inventory.remove("herb"):
+		notify("Você não tem ervas verdes.")
+		return false
+	player.health = mini(100, player.health + 45)
+	player.health_changed.emit(player.health)
+	audio.play("step", -8)
+	notify("Erva verde utilizada · +45 de vida")
+	return true
+
+func toggle_map() -> void:
+	if not started or player.health <= 0 or inventory_open or dialogue_active or hud.screen not in ["none", "map"]:
+		return
+	var opened: bool = hud.screen != "map"
+	get_tree().paused = opened
+	hud.show_screen("map" if opened else "none")
+	player.cooldown = maxf(player.cooldown, .25)
+
+func _apply_graphics() -> void:
+	world.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth_graphics else CanvasItem.TEXTURE_FILTER_NEAREST
+	player.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	var smoothing = preload("res://shaders/soft_pixel.tres") if smooth_graphics else null
+	world.material = smoothing
+	for object in world.actors.get_children() + world.roofs.get_children():
+		if object.get_script() in [ZOMBIE, preload("res://src/world/prop.gd"), preload("res://src/world/roof.gd"), preload("res://src/actors/survivor.gd")]:
+			object.material = smoothing

@@ -84,9 +84,20 @@ def main():
             game = picture("started")
             red, green, blue = game.getpixel((100, 664))[:3]
             assert red > 130 and green > 100 and blue < 180, "Start click did not enter gameplay"
+            key("i")
+            inventory = picture("inventory")
+            assert max(inventory.getpixel((400, 300))[:3]) < 60, "I did not open inventory"
+            key("Escape")
+            key("Tab")
+            world_map = picture("map")
+            red, green, blue = world_map.getpixel((270, 150))[:3]
+            assert 40 < red < 60 and 64 < green < 82, "Tab did not open map"
+            key("Escape")
+            key("space")
+            key("f")
             key("e")
-            key("s", 1.16)
-            key("d", .9)
+            key("s", 1.0)
+            key("d", .78)
             time.sleep(.2)
             key("e")
             dialogue = picture("dialogue")
@@ -112,7 +123,7 @@ def main():
     output = log_path.read_text()
     if "SCRIPT ERROR:" in output or "\nERROR:" in output:
         raise RuntimeError(output)
-    print("PASS: native Linux start, keyboard movement, door, NPC dialogue, shooting, pause, restart and quit")
+    print("PASS: native Linux start, inventory, map, jump, knife, keyboard movement, door, NPC dialogue, shooting, pause, restart and quit")
 
 
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ const ACCENT := Color("dfb579")
 const DARK := Color("142723")
 const REGULAR: Font = preload("res://art/regular.ttf")
 const BOLD: Font = preload("res://art/bold.ttf")
-const PISTOL: Texture2D = preload("res://art/vendor/craftpix/pistol.png")
+const ITEMS = preload("res://src/systems/items.gd")
 
 var game: Node
 var screen: String = "title"
@@ -71,7 +71,7 @@ func show_screen(mode: String) -> void:
 	screen = mode
 	_layout()
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN if screen == "none" and not game.dialogue_active else Input.MOUSE_MODE_VISIBLE
-	if screen != "none":
+	if screen in ["title", "pause", "dead", "help"]:
 		primary.grab_focus()
 	else:
 		primary.release_focus()
@@ -80,12 +80,12 @@ func show_screen(mode: String) -> void:
 func _layout() -> void:
 	var w := size.x
 	var h := size.y
-	primary.visible = screen != "none"
+	primary.visible = screen in ["title", "pause", "dead", "help"]
 	secondary.visible = screen in ["title", "pause", "dead"]
 	third.visible = screen == "pause"
 	quit_button.visible = screen == "pause"
 	volume_slider.visible = screen == "pause"
-	pause_button.visible = screen == "none" and not game.dialogue_active
+	pause_button.visible = screen == "none" and not game.dialogue_active and not game.inventory_open
 	pause_button.position = Vector2(w - 182, h - 58)
 	pause_button.size = Vector2(150, 30)
 	if screen in ["title", "dead"]:
@@ -164,6 +164,8 @@ func _draw() -> void:
 			text_at("VOLUME", Vector2(w / 2 - 190, h / 2 + 53), 11, MUTED, true)
 		elif screen == "help":
 			_draw_help(w, h)
+		elif screen == "map":
+			_draw_large_map(w, h)
 
 func _draw_title(w: float, h: float) -> void:
 	draw_line(Vector2(90, 86), Vector2(150, 86), ACCENT, 3)
@@ -187,7 +189,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.2.0  /  KIT CRAFTPIX", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.3.0  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:
@@ -196,12 +198,12 @@ func _draw_help(w: float, h: float) -> void:
 	panel(Rect2(x, y, 540, 540))
 	text_at("ANTES DE SAIR", Vector2(x + 40, y + 42), 12, ACCENT, true)
 	text_at("Conheça os controles", Vector2(x + 40, y + 81), 26, PAPER, true)
-	var controls := [["W A S D / SETAS", "Caminhar"], ["MOUSE / RODA", "Mirar / ajustar zoom"], ["BOTÃO ESQUERDO", "Atirar / segure para repetir"], ["E", "Abrir portas / conversar"], ["ESC", "Pausar / fechar diálogo"], ["M", "Ligar ou desligar o som"], ["F11", "Alternar tela cheia"]]
+	var controls := [["WASD / SETAS", "Caminhar"], ["MOUSE / RODA", "Mirar / zoom"], ["BOTÃO ESQUERDO", "Disparar arma equipada"], ["F / BOTÃO DIREITO", "Faca / cortar caixas"], ["ESPAÇO", "Pular / subir em obstáculos baixos"], ["E", "Portas / recipientes / conversar"], ["I / TAB", "Inventário / mapa do bairro"], ["1 / 2 / 3 / 4", "Pistola / escopeta / fuzil / faca"], ["H", "Usar erva verde (+45 de vida)"], ["ESC / M / F11", "Pausa / som / tela cheia"], ["F2", "Alternar filtro suave / pixel clássico"]]
 	for i in range(controls.size()):
-		var row_y: float = y + 129 + i * 39
-		text_at(controls[i][0], Vector2(x + 40, row_y), 11, ACCENT, true)
-		text_at(controls[i][1], Vector2(x + 215, row_y), 12, PAPER)
-	text_at("Munição infinita. Sem coleta ou inventário nesta versão.", Vector2(x + 40, y + 430), 11, MUTED)
+		var row_y: float = y + 120 + i * 26
+		text_at(controls[i][0], Vector2(x + 30, row_y), 10, ACCENT, true)
+		text_at(controls[i][1], Vector2(x + 212, row_y), 11, PAPER)
+	text_at("Munições próprias por arma · inventário sem limite · ondas crescentes", Vector2(x + 30, y + 430), 10, MUTED)
 
 func _draw_game(w: float, h: float) -> void:
 	# Small edge panels keep the center of the play area unobstructed.
@@ -210,16 +212,15 @@ func _draw_game(w: float, h: float) -> void:
 	text_at("ÚLTIMO BAIRRO", Vector2(43, 52), 18, PAPER, true)
 	text_at("VILA AURORA  /  DIA 01", Vector2(44, 76), 10, MUTED, true)
 	panel(Rect2(24, 105, 300, 63), Color(.055, .115, .10, .86))
-	var title := "PRIMEIRO CONTATO"
-	var detail := "Encontre Mara perto da casa."
-	if game.met_mara:
-		title = "RUA EM SILÊNCIO"
-		detail = "Explore e elimine os infectados."
-	if game.remaining == 0:
-		title = "BAIRRO SEGURO"
-		detail = "Área limpa. Explore livremente."
+	var title := "ONDA %02d  /  %02d INFECTADOS" % [game.wave, game.remaining]
+	var detail := "Explore e procure armas e suprimentos."
+	if not game.met_mara:
+		detail = "Mara está no jardim. E para conversar."
+	if game.wave_countdown >= 0:
+		title = "ONDA CONCLUÍDA"
+		detail = "Próxima horda em %d segundos." % ceili(game.wave_countdown)
 	text_at(title, Vector2(43, 128), 10, ACCENT, true)
-	text_at(detail, Vector2(43, 151), 12, PAPER)
+	text_at(detail, Vector2(43, 151), 11, PAPER)
 	_draw_minimap(w - 210, 24)
 	# Health, status and weapon.
 	panel(Rect2(24, h - 98, 264, 74))
@@ -233,11 +234,17 @@ func _draw_game(w: float, h: float) -> void:
 	draw_rect(Rect2(84, h - 60, 184.0 * game.player.health / 100.0, 8), health_color)
 	text_at("EM MOVIMENTO" if game.player.velocity.length() > 0 else "MANTENHA A CALMA", Vector2(84, h - 34), 9, MUTED)
 	panel(Rect2(w - 276, h - 144, 252, 74))
-	draw_texture_rect(PISTOL, Rect2(w - 260, h - 123, 52, 35), false)
-	text_at("PISTOLA 9 mm", Vector2(w - 195, h - 116), 11, MUTED, true)
-	text_at("∞", Vector2(w - 198, h - 84), 29, ACCENT, true)
-	text_at("MUNIÇÃO INFINITA", Vector2(w - 164, h - 88), 9, PAPER)
-	text_at("WASD  MOVER    MOUSE  MIRAR    E  INTERAGIR", Vector2(w / 2 - 190, h - 28), 10, MUTED)
+	draw_texture_rect(ITEMS.icon(game.player.weapon_id), Rect2(w - 264, h - 131, 60, 44), false)
+	var weapon_name: String = ITEMS.label(game.player.weapon_id)
+	text_at(weapon_name.to_upper(), Vector2(w - 195, h - 116), 11, MUTED, true)
+	var ammo := "∞" if game.player.weapon_id == "knife" else str(game.inventory.count(game.player.weapon.ammo_type))
+	text_at(ammo, Vector2(w - 198, h - 84), 27, ACCENT, true)
+	text_at("1  2  3  4  ARMAS", Vector2(w - 146, h - 88), 9, PAPER)
+	text_at("I  ITENS    TAB  MAPA    ESPAÇO  PULAR    F  FACA    H  ERVA", Vector2(w / 2 - 240, h - 28), 10, MUTED)
+	if game.notification_time > 0 and not game.inventory_open:
+		var length := REGULAR.get_string_size(game.toast_message, HORIZONTAL_ALIGNMENT_LEFT, -1, 13).x
+		panel(Rect2(w / 2 - length / 2 - 18, 32, length + 36, 38))
+		text_at(game.toast_message, Vector2(w / 2 - length / 2, 56), 13, ACCENT)
 	if game.dialogue_active:
 		_draw_dialogue(w, h)
 	elif is_instance_valid(game.nearby):
@@ -245,12 +252,12 @@ func _draw_game(w: float, h: float) -> void:
 		var length := REGULAR.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, 14).x
 		panel(Rect2(w / 2 - length / 2 - 35, h - 135, length + 82, 42))
 		draw_rect(Rect2(w / 2 - length / 2 - 25, h - 126, 25, 24), ACCENT)
-		text_at("E", Vector2(w / 2 - length / 2 - 18, h - 109), 13, DARK, true)
+		text_at("F" if caption.begins_with("Corte") else "E", Vector2(w / 2 - length / 2 - 18, h - 109), 13, DARK, true)
 		text_at(caption, Vector2(w / 2 - length / 2 + 12, h - 108), 14, PAPER)
 	if game.player.invulnerable > 0:
 		var alpha: float = game.player.invulnerable * .11
 		draw_rect(Rect2(Vector2.ZERO, size), Color(.7, .17, .11, alpha))
-	if not game.dialogue_active:
+	if not game.dialogue_active and not game.inventory_open:
 		var at := get_local_mouse_position()
 		var col := ACCENT if hit_timer > 0 else PAPER
 		for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
@@ -262,20 +269,42 @@ func _draw_game(w: float, h: float) -> void:
 
 func _draw_minimap(x: float, y: float) -> void:
 	panel(Rect2(x, y, 186, 176))
-	text_at("VILA AURORA", Vector2(x + 12, y + 23), 10, PAPER, true)
-	var origin := Vector2(x + 12, y + 36)
-	var scale_map := Vector2(162.0 / 2304.0, 108.0 / 1536.0)
-	draw_rect(Rect2(origin, Vector2(162, 108)), Color("304839"))
-	draw_rect(Rect2(origin + Vector2(0, 640) * scale_map, Vector2(162, 160 * scale_map.y)), Color("67756b"))
-	draw_rect(Rect2(origin + Vector2(960, 0) * scale_map, Vector2(160 * scale_map.x, 108)), Color("67756b"))
+	text_at("VILA AURORA · TAB MAPA", Vector2(x + 10, y + 23), 9, PAPER, true)
+	_map_geometry(Rect2(x + 12, y + 36, 162, 108), false)
+	text_at("ONDA %02d  /  %s" % [game.wave, _time(game.elapsed)], Vector2(x + 12, y + 162), 9, MUTED)
+
+func _map_geometry(bounds: Rect2, labels: bool) -> void:
+	var scale_map: Vector2 = bounds.size / game.world.MAP_SIZE
+	draw_rect(bounds, Color("304839"))
+	for rx in game.world.ROAD_X:
+		draw_rect(Rect2(bounds.position + Vector2(rx, 0) * scale_map, Vector2(160 * scale_map.x, bounds.size.y)), Color("65766c"))
+	for ry in game.world.ROAD_Y:
+		draw_rect(Rect2(bounds.position + Vector2(0, ry) * scale_map, Vector2(bounds.size.x, 160 * scale_map.y)), Color("65766c"))
 	for house in game.world.houses:
 		var rect: Rect2 = house.rect
-		draw_rect(Rect2(origin + rect.position * scale_map, rect.size * scale_map), Color("a49c7b"))
-	draw_circle(origin + Vector2(466, 548) * scale_map, 2, Color("99c1b1"))
-	var player_pos: Vector2 = origin + game.player.global_position * scale_map
-	draw_circle(player_pos, 4, Color("1d322b"))
-	draw_circle(player_pos, 2.5, ACCENT)
-	text_at("%02d INFECTADOS  /  %s" % [game.remaining, _time(game.elapsed)], Vector2(x + 12, y + 162), 9, MUTED)
+		var area := Rect2(bounds.position + rect.position * scale_map, rect.size * scale_map)
+		draw_rect(area, Color("b0a587"))
+		draw_rect(area, Color("d1c3a0"), false, 1)
+		if labels:
+			var label: String = house.name.replace("MERCADO AURORA", "MERCADO").replace("HORTA COMUNITÁRIA", "HORTA").replace("POSTO DE RESGATE", "RESGATE")
+			var wrapped := _wrap(label, area.size.x - 4, 8)
+			draw_multiline_string(REGULAR, area.position + Vector2(3, 11), wrapped, HORIZONTAL_ALIGNMENT_LEFT, area.size.x - 4, 8, 3, DARK)
+	var player_pos: Vector2 = bounds.position + game.player.global_position * scale_map
+	draw_circle(bounds.position + Vector2(466, 548) * scale_map, 3, Color("99c1b1"))
+	draw_circle(player_pos, 6 if labels else 4, Color("1d322b"))
+	draw_circle(player_pos, 4 if labels else 2.5, ACCENT)
+	if labels:
+		text_at("VOCÊ", player_pos + Vector2(10, 5), 10, ACCENT, true)
+
+func _draw_large_map(w: float, h: float) -> void:
+	panel(Rect2(50, 36, w - 100, h - 72))
+	text_at("VILA AURORA", Vector2(78, 77), 27, PAPER, true)
+	text_at("27 construções · residencial, comércio, indústria e parques", Vector2(78, 102), 13, MUTED)
+	var available := Vector2(w - 180, h - 215)
+	var factor := minf(available.x / game.world.MAP_SIZE.x, available.y / game.world.MAP_SIZE.y)
+	var map_size: Vector2 = game.world.MAP_SIZE * factor
+	_map_geometry(Rect2(Vector2(w / 2 - map_size.x / 2, 140), map_size), true)
+	text_at("TAB / ESC  FECHAR   ·   AMARELO: VOCÊ   ·   VERDE CLARO: MARA", Vector2(78, h - 60), 11, ACCENT)
 
 func _draw_dialogue(w: float, h: float) -> void:
 	var rect := Rect2(w / 2 - 350, h - 216, 700, 154)

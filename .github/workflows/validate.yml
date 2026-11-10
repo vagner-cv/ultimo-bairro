@@ -64,7 +64,7 @@ jobs:
       - name: Export Windows and Linux
         run: |
           .venv/bin/python tools/build.py
-          git archive --format=zip --prefix=ultimo-bairro/ --output=builds/UltimoBairro-0.2.0-Codigo.zip HEAD
+          git archive --format=zip --prefix=ultimo-bairro/ --output=builds/UltimoBairro-0.3.0-Codigo.zip HEAD
       - uses: actions/upload-artifact@v4
         with:
           name: UltimoBairro-Windows
@@ -81,7 +81,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if ! gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "Último Bairro ${GITHUB_REF_NAME}" --notes-file docs/RELEASE-0.2.0.md
+            gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title "Último Bairro ${GITHUB_REF_NAME}" --notes-file docs/RELEASE-0.3.0.md
           fi
-          gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber builds/UltimoBairro-0.2.0-Windows.zip builds/UltimoBairro-0.2.0-Linux.zip builds/UltimoBairro-0.2.0-Codigo.zip
+          gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber builds/UltimoBairro-0.3.0-Windows.zip builds/UltimoBairro-0.3.0-Linux.zip builds/UltimoBairro-0.3.0-Codigo.zip
           gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false

@@ -7,7 +7,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "builds"
 LOGS = BUILD / "logs"
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 
 def run(name, arguments):
@@ -38,14 +38,18 @@ def main():
         for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt", "CRAFTPIX-NOTICE.txt"]:
             shutil.copy(ROOT / "art" / notice, folder / notice)
         (folder / "LEIA-ME.txt").write_text(
-            "ÚLTIMO BAIRRO — PROTÓTIPO 0.2.0\n\n"
+            "ÚLTIMO BAIRRO — PROTÓTIPO 0.3.0\n\n"
             "Extraia todos os arquivos antes de jogar.\n"
             f"Abra {executable}. Não precisa instalar Godot.\n\n"
             "WASD ou setas: caminhar\nMouse: mirar\nBotão esquerdo: atirar (segure para repetir)\n"
             "Roda do mouse: zoom\nE: portas e conversa\nEsc: pausa / encerrar diálogo\nM: áudio\nF11: tela cheia\n\n"
             "Você começa na casa 07. Use E perto da porta para sair.\n"
-            "Mara está no jardim à direita. Há 18 infectados no bairro.\n"
-            "Munição infinita, sem recarga. Sem coleta ou salvamento nesta versão.\n\n"
+            "Mara está no jardim à direita. A primeira onda tem 18 infectados.\n"
+            "Cada onda seguinte traz mais 8 infectados, após 12 segundos de intervalo.\n"
+            "Munição finita e própria para cada arma. A faca não usa munição.\n"
+            "Abra armários, gavetas e lixeiras com E. Corte caixas com a faca.\n"
+            "Organize os itens no inventário; sem limite de carregamento.\n"
+            "O conteúdo dos recipientes persiste durante a partida. Não há salvamento.\n\n"
             "Arte: CraftPix.net, kit gratuito Zombie Apocalypse.\nMotor Godot; fontes DejaVu.\n"
             "As licenças dessas dependências acompanham este pacote.\n",
             encoding="utf-8")

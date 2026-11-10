@@ -6,10 +6,11 @@ var idle_animation: float = 0.0
 var lines: Array[String] = [
 	"Você acordou. Achei que não fosse sair daquela casa. Sou a Mara.",
 	"As saídas do bairro estão bloqueadas. A rua principal está cheia deles... vá com cuidado.",
-	"Portas fechadas seguram os infectados. E os tiros chamam atenção. Não deixe que te cerquem."
+	"Portas fechadas seguram os infectados. Use E nos armários, F para cortar caixas e H para usar ervas. A próxima horda chega quando você eliminar esta."
 ]
 
 func _ready() -> void:
+	material = preload("res://shaders/soft_pixel.tres")
 	collision_layer = 8
 	collision_mask = 0
 	add_to_group("interactables")

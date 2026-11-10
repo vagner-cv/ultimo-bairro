@@ -88,7 +88,7 @@ def prepare(data):
         atlas.crop((x * 16, y * 16, (x + width) * 16, (y + height) * 16)).save(DEST / f"{name}.png")
     ground = Image.new("RGBA", (768, 128))
     materials = [[249, 249, 271, 249], [72, 72, 334, 357], [244, 244, 266, 244],
-                 [330, 352, 330, 330], [330, 331, 352, 330], [271, 249, 271, 271]]
+                 [331, 332, 353, 354], [331, 332, 353, 354], [271, 249, 271, 271]]
     for kind, tiles in enumerate(materials):
         for y in range(4):
             for x in range(4):

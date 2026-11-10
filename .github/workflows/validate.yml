@@ -1,0 +1,71 @@
+name: Validate and build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: 4.6.3
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install official Godot
+        run: |
+          curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_*
+          echo /tmp/godot >> "$GITHUB_PATH"
+          ln -s /tmp/godot/Godot_* /tmp/godot/godot
+      - name: Import assets
+        run: godot --headless --path . --editor --import --quit
+      - name: Test gameplay
+        run: |
+          godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd 2>&1 | tee /tmp/ultimo-bairro-tests.log
+          ! grep -Eq '^SCRIPT ERROR:|^ERROR:' /tmp/ultimo-bairro-tests.log
+
+  build:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install official Godot
+        run: |
+          curl -fL --retry 3 "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o /tmp/godot.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          chmod +x /tmp/godot/Godot_*
+          echo /tmp/godot >> "$GITHUB_PATH"
+          ln -s /tmp/godot/Godot_* /tmp/godot/godot
+      - name: Download PC release templates
+        run: python3 tools/fetch_export_templates.py --destination "$HOME/.local/share/godot/export_templates/4.6.3.stable"
+      - name: Export Windows and Linux
+        run: |
+          mkdir -p builds/windows builds/linux
+          godot --headless --path . --editor --import --quit
+          godot --headless --path . --export-release "Windows Desktop" builds/windows/UltimoBairro.exe
+          godot --headless --path . --export-release Linux builds/linux/UltimoBairro.x86_64
+          cp art/FONT-LICENSE.txt builds/windows/
+          cp art/FONT-LICENSE.txt builds/linux/
+          cp art/GODOT-LICENSE.txt builds/windows/
+          cp art/GODOT-LICENSE.txt builds/linux/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UltimoBairro-Windows
+          path: builds/windows/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UltimoBairro-Linux
+          path: builds/linux/
+          retention-days: 14

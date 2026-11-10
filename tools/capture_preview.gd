@@ -1,0 +1,45 @@
+extends SceneTree
+
+var game: Node
+
+func _initialize() -> void:
+	call_deferred("capture")
+
+func save_frame(path: String) -> void:
+	await RenderingServer.frame_post_draw
+	var picture := root.get_texture().get_image()
+	var error := picture.save_png(path)
+	assert(error == OK)
+	print("Saved ", path)
+
+func capture() -> void:
+	game = load("res://scenes/main.tscn").instantiate()
+	root.add_child(game)
+	await create_timer(.7).timeout
+	await save_frame("res://docs/title.png")
+	game.begin()
+	await create_timer(.7).timeout
+	await save_frame("res://docs/interior.png")
+	game.world.doors[0].interact(game.player)
+	game.player.position = Vector2(505, 570)
+	game.player.camera.reset_smoothing()
+	await create_timer(.7).timeout
+	await save_frame("res://docs/gameplay.png")
+	game.player.position = Vector2(466, 590)
+	await create_timer(.15).timeout
+	game.start_dialogue("MARA", game.get_tree().get_nodes_in_group("interactables").filter(func(n: Node) -> bool: return n.get_script() == load("res://src/actors/survivor.gd"))[0].lines)
+	await create_timer(.2).timeout
+	await save_frame("res://docs/dialogue.png")
+	game.end_dialogue()
+	game.player.position = Vector2(800, 630)
+	game.player.camera.reset_smoothing()
+	await create_timer(.3).timeout
+	game.player.cooldown = 0
+	game.player.fire_at(Vector2(875, 640))
+	await save_frame("res://docs/combat.png")
+	game.toggle_pause()
+	await save_frame("res://docs/pause.png")
+	game.queue_free()
+	await process_frame
+	await create_timer(.25).timeout
+	quit()

@@ -5,17 +5,20 @@
 - Mantenha a primeira versão focada: um jogador, uma arma infinita, zumbis,
   portas, um NPC e bairro finito. Novos sistemas precisam fazer parte do pedido.
 - Não ative inventário, coleta, saque, fome/sede ou multiplayer por conta própria.
-- Preserve arte/sons originais e a licença das fontes. Não adicione assets
-  extraídos dos jogos usados como referência.
+- Use o kit pronto documentado em `art/README.md`, preservando sua licença.
+  Não adicione assets extraídos dos jogos usados como referência.
 - Use recursos `WeaponData` para os atributos de armas. Atualize a navegação
   sempre que uma porta mudar seu estado de colisão.
 - Teste alterações de gameplay com:
   `godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd`.
 - Em um checkout limpo, importe primeiro:
   `godot --headless --path . --editor --import --quit`.
+- Antes da importação, instale `requirements-tools.txt` em um venv e execute
+  `python tools/prepare_assets.py`. `art/vendor/` é gerado e ignorado pelo Git.
 - Para mudanças visuais, execute o jogo e confira capturas; a ferramenta
   `tools/capture_preview.gd` registra uma sequência no próprio Godot.
 - Não versionar `.godot/`, executáveis, credenciais ou pacotes de builds.
 - Evite adicionar bibliotecas e frameworks até haver uma necessidade concreta.
-- Preserve a arte ilustrada de `art/source/`, empacotada por `tools/pack_art.py`.
-  Não substitua personagens ou objetos ilustrados por figuras geométricas.
+- Não versione os PNGs/ZIPs da CraftPix nem inclua-os no ZIP de código-fonte.
+  Distribua-os embutidos no jogo. As versões anteriores de arte estão no histórico.
+- Não substitua a arte do kit por imagens geradas ou figuras geométricas.

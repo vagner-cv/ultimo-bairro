@@ -1,4 +1,4 @@
-# Design — protótipo 0.1
+# Design — protótipo 0.2
 
 ## Experiência
 
@@ -8,8 +8,8 @@ depois, explorar e eliminar os infectados. Ao limpar a área, a exploração
 continua. Não há condição de fuga ou campanha nesta versão.
 
 O controle deve permitir caminhar em uma direção e apontar em outra. O
-mouse oferece mira livre em 360 graus. Os sprites possuem quatro direções
-e quatro quadros de caminhada; a arma acompanha o ângulo real da mira.
+mouse oferece mira livre em 360 graus. O kit pronto oferece animações laterais
+com espelhamento; a arma acompanha o ângulo real da mira.
 
 ## Regras atuais
 

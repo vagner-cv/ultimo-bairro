@@ -6,7 +6,7 @@ const ACCENT := Color("dfb579")
 const DARK := Color("142723")
 const REGULAR: Font = preload("res://art/regular.ttf")
 const BOLD: Font = preload("res://art/bold.ttf")
-const PISTOL: Texture2D = preload("res://art/world/pistol.png")
+const PISTOL: Texture2D = preload("res://art/vendor/craftpix/pistol.png")
 
 var game: Node
 var screen: String = "title"
@@ -187,7 +187,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.1.1  /  ARTE REVISADA", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.2.0  /  KIT CRAFTPIX", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:

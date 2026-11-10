@@ -26,6 +26,11 @@ jobs:
           chmod +x /tmp/godot/Godot_*
           echo /tmp/godot >> "$GITHUB_PATH"
           ln -s /tmp/godot/Godot_* /tmp/godot/godot
+      - name: Prepare licensed free artwork
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r requirements-tools.txt
+          .venv/bin/python tools/prepare_assets.py
       - name: Import assets
         run: godot --headless --path . --editor --import --quit
       - name: Test gameplay
@@ -49,6 +54,11 @@ jobs:
           ln -s /tmp/godot/Godot_* /tmp/godot/godot
       - name: Download PC release templates
         run: python3 tools/fetch_export_templates.py --destination "$HOME/.local/share/godot/export_templates/4.6.3.stable"
+      - name: Prepare licensed free artwork
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install -r requirements-tools.txt
+          .venv/bin/python tools/prepare_assets.py
       - name: Export Windows and Linux
         run: |
           mkdir -p builds/windows builds/linux
@@ -59,6 +69,8 @@ jobs:
           cp art/FONT-LICENSE.txt builds/linux/
           cp art/GODOT-LICENSE.txt builds/windows/
           cp art/GODOT-LICENSE.txt builds/linux/
+          cp art/CRAFTPIX-NOTICE.txt builds/windows/
+          cp art/CRAFTPIX-NOTICE.txt builds/linux/
       - uses: actions/upload-artifact@v4
         with:
           name: UltimoBairro-Windows

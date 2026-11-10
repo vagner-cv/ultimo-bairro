@@ -2,7 +2,7 @@ extends Node2D
 
 var entries: Array[Dictionary] = []
 var corpses: Array[Dictionary] = []
-const ZOMBIE: Texture2D = preload("res://art/zombie.png")
+const KIT = preload("res://src/systems/kit_art.gd")
 
 func tracer(start: Vector2, end: Vector2, hit: bool) -> void:
 	entries.append({"kind": "shot", "a": start, "b": end, "life": .12, "max": .12, "hit": hit})
@@ -15,12 +15,13 @@ func blood(at: Vector2, direction: Vector2) -> void:
 func corpse(at: Vector2, tint: Color) -> void:
 	corpses.append({"at": at, "tint": tint, "angle": randf_range(-.6, .6)})
 	var sprite := Sprite2D.new()
-	sprite.texture = ZOMBIE
+	sprite.texture = KIT.ZOMBIE_DEAD
 	sprite.region_enabled = true
-	sprite.region_rect = Rect2(0, 0, 64, 64)
-	sprite.position = at + Vector2(0, -10)
-	sprite.rotation = PI / 2 + corpses[-1].angle
-	sprite.modulate = Color(.7, .66, .59)
+	sprite.region_rect = Rect2(32, 0, 32, 32)
+	sprite.scale = Vector2(2, 2)
+	sprite.position = at + Vector2(0, -30)
+	sprite.flip_h = corpses[-1].angle < 0
+	sprite.modulate = Color(.85, .85, .85)
 	get_parent().actors.add_child(sprite)
 
 func _process(delta: float) -> void:

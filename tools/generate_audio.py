@@ -1,4 +1,4 @@
-"""Regenerate the prototype audio only. Artwork is packed by pack_art.py."""
+"""Regenerate prototype audio. Artwork is prepared by prepare_assets.py."""
 from pathlib import Path
 import math
 import random

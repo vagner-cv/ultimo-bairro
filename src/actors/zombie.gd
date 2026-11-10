@@ -2,7 +2,7 @@ extends CharacterBody2D
 
 enum State { WANDER, CHASE, DEAD }
 
-const SPRITES: Texture2D = preload("res://art/zombie.png")
+const KIT = preload("res://src/systems/kit_art.gd")
 var game: Node
 var state: State = State.WANDER
 var health: int = 90
@@ -20,6 +20,7 @@ var knockback: Vector2 = Vector2.ZERO
 var tint: Color = Color.WHITE
 var last_known: Vector2
 var memory: float = 0.0
+var idle_animation: float = 0.0
 
 func _ready() -> void:
 	collision_layer = 4
@@ -40,6 +41,7 @@ func _physics_process(delta: float) -> void:
 	if state == State.DEAD or not is_instance_valid(game.player):
 		return
 	attack_timer = maxf(0, attack_timer - delta)
+	idle_animation += delta * 4
 	flash = maxf(0, flash - delta)
 	think_timer -= delta
 	memory = maxf(0, memory - delta)
@@ -118,7 +120,16 @@ func take_damage(amount: int, direction: Vector2 = Vector2.ZERO) -> void:
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0.015, .04, .035, .3))
 	var color := Color(1.6, 1.4, 1.2) if flash > 0 else tint
-	draw_texture_rect_region(SPRITES, Rect2(-32, -62, 64, 64), Rect2((int(animation) % 4) * 64, facing * 64, 64, 64), color)
+	var moving := velocity.length_squared() > 4
+	var texture: Texture2D = KIT.ZOMBIE_WALK if moving else KIT.ZOMBIE_IDLE
+	var frame := int(animation if moving else idle_animation)
+	if attack_timer > .8:
+		texture = KIT.ZOMBIE_ATTACK
+		frame = mini(3, int((1.1 - attack_timer) * 12))
+	var left := facing == 3
+	if state == State.CHASE and is_instance_valid(game.player):
+		left = game.player.global_position.x < global_position.x
+	KIT.actor(self, texture, frame, left, color)
 	if health < max_health:
-		draw_rect(Rect2(-13, -53, 26, 3), Color("253a33"))
-		draw_rect(Rect2(-13, -53, 26.0 * health / max_health, 3), Color("d89b6a"))
+		draw_rect(Rect2(-13, -42, 26, 3), Color("253a33"))
+		draw_rect(Rect2(-13, -42, 26.0 * health / max_health, 3), Color("d89b6a"))

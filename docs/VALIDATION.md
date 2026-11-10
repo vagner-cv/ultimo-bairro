@@ -1,10 +1,10 @@
-# Validação da entrega 0.1.1
+# Validação da entrega 0.2.0
 
 Validado em 10 de novembro de 2026, com Godot 4.6.3 Standard, em Linux x64.
 
-A revisão 0.1.1 substitui a arte geométrica da primeira entrega por sprites
-ilustrados, materiais de terreno e novos quadros de personagens. Acrescenta
-zoom pela roda do mouse. A captura `overview.png` mostra a arte dentro do jogo.
+A revisão 0.2.0 integra o kit pronto gratuito da CraftPix, incluindo tiles,
+objetos e animações nativas. Os PNGs são preparados a partir do arquivo do autor,
+com verificação de SHA-256. As capturas mostram esse kit dentro do jogo.
 
 ## Verificações concluídas
 
@@ -26,8 +26,9 @@ alvo do jogo. Ainda não foi medido o desempenho em um PC representativo.
 
 O executável Windows foi exportado e seu formato PE x64 foi verificado, mas
 não foi executado em Windows. Não há uma sessão Windows neste ambiente.
-A pipeline do GitHub está preparada, mas ainda não foi executada no GitHub:
-a criação do repositório pela integração foi recusada com HTTP 403.
+A pipeline do GitHub prepara os assets e executa as verificações em cada push.
+O estado de cada commit fica na aba Actions do repositório privado:
+https://github.com/vagner-cv/ultimo-bairro/actions.
 
 Os logs e capturas do teste nativo ficam em `builds/`, fora do histórico Git.
 As capturas de referência do projeto estão nesta pasta `docs/`.

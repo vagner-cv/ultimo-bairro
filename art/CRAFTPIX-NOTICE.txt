@@ -1,0 +1,10 @@
+Artwork: CraftPix.net / Free Game Assets (GUI, Sprite, Tilesets).
+Pack: Free Zombie Apocalypse Top-Down Pixel Art Kit.
+https://free-game-assets.itch.io/free-zombie-apocalypse-top-down-pixel-art-kit
+License: https://craftpix.net/file-licenses/ (Freebie Products).
+
+The author permits personal/commercial game use and modification.
+The artwork may not be resold or redistributed as standalone asset files.
+These builds use the artwork embedded in the game. The source repository
+contains preparation code; it downloads the free archive from the author.
+Asset credits are appreciated by the author, although not required.

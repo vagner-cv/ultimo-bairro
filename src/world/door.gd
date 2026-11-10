@@ -4,8 +4,7 @@ signal changed
 var is_open: bool = false
 var caption: String = "Porta"
 var collision: CollisionShape2D
-const CLOSED: Texture2D = preload("res://art/world/door_closed.png")
-const OPEN: Texture2D = preload("res://art/world/door_open.png")
+const KIT = preload("res://src/systems/kit_art.gd")
 
 func _ready() -> void:
 	collision_layer = 1
@@ -32,4 +31,4 @@ func navigation_rect() -> Rect2:
 	return Rect2(position + Vector2(-28, -14), Vector2(56, 14))
 
 func _draw() -> void:
-	draw_texture_rect(OPEN if is_open else CLOSED, Rect2(-30, -62, 60, 65), false)
+	KIT.door(self, Vector2(-32, -64), is_open)

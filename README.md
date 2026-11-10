@@ -1,37 +1,23 @@
 # Último Bairro
 
-Um protótipo de sobrevivência pós-apocalíptica para PC: explore Vila Aurora,
-converse com uma sobrevivente e enfrente os infectados com uma pistola de
-munição infinita. Desenvolvido em **Godot 4.6.3**, com visão de cima em 2D.
+Protótipo de sobrevivência para PC em **Godot 4.6.3**. Explore Vila Aurora,
+converse com Mara e enfrente 18 infectados com uma pistola de munição infinita.
+A versão **0.2.0** usa o kit pronto de pixel art da CraftPix.
 
-![Vila Aurora com a arte revisada](docs/overview.png)
+![Partida com o kit CraftPix integrado](docs/gameplay.png)
 
-## Jogar
+## Baixar e jogar
 
-**Windows x64:** extraia `UltimoBairro-0.1.1-Windows.zip` e abra
-`UltimoBairro.exe`. Não precisa instalar Godot.
+Abra [Releases](https://github.com/vagner-cv/ultimo-bairro/releases) e baixe:
 
-**Linux x64:** extraia `UltimoBairro-0.1.1-Linux.zip` e execute
-`./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
+- **Windows x64:** `UltimoBairro-0.2.0-Windows.zip`. Extraia tudo e abra
+  `UltimoBairro.exe`.
+- **Linux x64:** `UltimoBairro-0.2.0-Linux.zip`. Extraia e execute
+  `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
-Os pacotes são gerados em `builds/`; os executáveis não ficam no histórico Git.
-Esta versão de Windows foi exportada em Linux e ainda precisa de um teste
-em uma máquina Windows. Não há instalador, salvamento ou multiplayer.
-
-### Executar pelo editor
-
-1. Instale [Godot 4.6.3 Standard](https://godotengine.org/download/archive/4.6.3-stable/)
-   (não é necessário .NET).
-2. Clone ou baixe este repositório.
-3. Importe `project.godot` no Godot e pressione **F6** com a cena principal
-   aberta, ou **F5** para executar o projeto.
-
-Pelo terminal, com Godot no PATH:
-
-```sh
-godot --path . --editor
-godot --path .
-```
+Os executáveis não precisam de Godot, Python ou instalação de assets.
+O pacote Windows foi exportado em Linux e ainda precisa de validação em Windows.
+Esta entrega é para PC; ainda não há versão publicada para navegador.
 
 ## Controles
 
@@ -39,91 +25,84 @@ godot --path .
 | --- | --- |
 | Caminhar | WASD ou setas |
 | Mirar | Mouse, em qualquer direção |
-| Ajustar o zoom | Roda do mouse |
+| Ajustar zoom | Roda do mouse |
 | Atirar | Botão esquerdo; segure para repetir |
-| Abrir/fechar portas, conversar, avançar fala | E |
-| Pausar ou encerrar conversa | Esc |
-| Ativar/desativar áudio | M |
-| Alternar tela cheia | F11 |
+| Portas / conversa / avançar fala | E |
+| Pausa / encerrar conversa | Esc |
+| Ativar ou desativar áudio | M |
+| Tela cheia | F11 |
 
-Você começa dentro da casa 07. Aproxime-se da porta e pressione **E** para sair.
-Mara está no jardim, à direita. Tiros atraem os infectados; paredes e portas
-fechadas bloqueiam disparos e a passagem dos zumbis.
+Você começa na casa 07. Use **E** perto da porta para sair; Mara está no jardim
+à direita. Tiros atraem infectados. Paredes e portas fechadas bloqueiam o tiro
+e o caminho. A partida pode ser reiniciada pelo menu de pausa ou após morrer.
 
-## O que já existe
+## Escopo atual
 
-- Um personagem, mira independente da movimentação e uma pistola infinita.
-- 18 zumbis com percepção por visão e som, perseguição, navegação e ataque.
-- Vida, dano, morte, reinício e objetivo de limpar o bairro.
-- Cinco construções com portas físicas e interiores acessíveis.
-- Ruas, praça, árvores, cercas, barricadas e carros abandonados.
-- Uma NPC com diálogo, minimapa, menus, efeitos e áudio.
-- Sprites ilustrados para casas, árvores, veículos, móveis e personagens,
-  com quatro direções de movimento e terreno texturizado.
+- Um jogador, uma pistola infinita, vida, dano, morte e reinício.
+- Zumbis com percepção por visão/som, perseguição, navegação e ataque.
+- Cinco construções acessíveis, ruas, praça, árvores, cercas, lixeiras e barricadas.
+- Uma NPC com diálogo, minimapa, interface e áudio.
+- Animações prontas de espera, caminhada, disparo, ataque e corpo morto.
 
-**Não implementados nesta etapa:** coleta, inventário, saque de corpos/móveis,
-outras armas, munição finita, fome/sede, salvamento, multiplayer e mundo infinito.
-O mapa é uma área finita e contínua de 2304 × 1536 unidades.
+O kit oferece personagens com animações laterais, usadas com espelhamento;
+movimentação e mira continuam livres. Os personagens são os skins do pacote.
+Não há inventário, coleta, saque, recarga, fome/sede, salvamento ou multiplayer.
+O bairro é uma área contínua de 2304 × 1536 unidades.
 
-## Organização
+## Abrir o código no Godot
 
-```text
-scenes/main.tscn          Cena de entrada
-src/main.gd              Ciclo da partida, interações e diálogos
-src/actors/              Jogador, zumbis e sobrevivente
-src/world/               Bairro, colisões, portas e telhados
-src/systems/             Dados da arma, áudio e efeitos
-src/ui/                  Interface e menus
-resources/pistol.tres     Atributos editáveis da pistola
-art/                     Sprites, fontes e sons
-tests/                   Testes integrados executados pelo Godot
-tools/                   Geração de assets, capturas e exportação
-docs/                    Design, plano de evolução e imagens
+1. Instale [Godot 4.6.3 Standard](https://godotengine.org/download/archive/4.6.3-stable/)
+   e Python 3.10 ou superior.
+2. Clone este repositório.
+3. Prepare os assets gratuitos do autor:
+
+```sh
+python3 -m venv .venv
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install -r requirements-tools.txt
+python tools/prepare_assets.py
 ```
 
-## Validar
+Também é possível baixar o ZIP gratuito na página do autor e executar:
 
-Não há dependências ou plugins externos necessários para rodar o jogo.
-Na primeira execução, importe os assets antes dos testes:
+```sh
+python tools/prepare_assets.py --archive /caminho/para/o/kit.zip
+```
+
+4. Importe `project.godot` no Godot e pressione **F5**.
+
+A arte licenciada fica em `art/vendor/`, ignorada pelo Git. O código de
+preparação baixa o arquivo público do autor, verifica seu SHA-256 e prepara
+apenas os PNGs usados pelo jogo. Os PNGs não acompanham os arquivos de código
+do GitHub; os executáveis incluem a arte embutida na partida.
+
+## Validar e exportar
+
+Depois de preparar os assets:
 
 ```sh
 godot --headless --path . --editor --import --quit
 godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd
 ```
 
-Os testes simulam movimentação e colisões, abertura de porta e atualização da
-navegação, disparos, paredes, dano/morte, diálogo, pausa e reinício. A saída
-`RESULT` deve indicar todas as verificações aprovadas.
+Há 32 verificações de movimentação, física, tiros, navegação, portas, diálogo,
+pausa, dano, morte e reinício. Para exportar, instale os modelos 4.6.3 em
+Editor → Gerenciar modelos de exportação e execute `python tools/build.py`.
+O comando valida, exporta Windows/Linux e monta ZIPs em `builds/` com os avisos
+de licença e instruções. A pipeline do GitHub valida os pushes e oferece builds
+pela execução manual ou por uma tag `v*`.
 
-## Exportar para PC
+## Estrutura e créditos
 
-Instale os modelos de exportação **4.6.3** em Editor → Gerenciar modelos de
-exportação, ou baixe apenas os modelos de release para PC:
+`src/actors/` contém os personagens, `src/world/` o bairro e portas,
+`src/systems/` armas/áudio/arte, e `src/ui/` a interface. A pistola é configurada
+em `resources/pistol.tres`.
 
-```sh
-python3 tools/fetch_export_templates.py --destination "$HOME/.local/share/godot/export_templates/4.6.3.stable"
-mkdir -p builds/windows builds/linux
-godot --headless --path . --export-release "Windows Desktop" builds/windows/UltimoBairro.exe
-godot --headless --path . --export-release "Linux" builds/linux/UltimoBairro.x86_64
-```
+- Arte: [Free Zombie Apocalypse Top-Down Pixel Art Kit — CraftPix](https://free-game-assets.itch.io/free-zombie-apocalypse-top-down-pixel-art-kit).
+- [Aviso de uso da CraftPix](art/CRAFTPIX-NOTICE.txt), [fontes DejaVu](art/FONT-LICENSE.txt)
+  e [Godot](art/GODOT-LICENSE.txt).
+- [Design](docs/DESIGN.md), [evolução](docs/ROADMAP.md) e [validação](docs/VALIDATION.md).
 
-O destino de modelos do comando Python acima é o padrão do Linux; em Windows
-ou macOS, prefira o instalador do próprio Godot. Os presets exportam o pacote
-do jogo embutido no executável. Com os modelos instalados, `python3 tools/build.py`
-importa, testa, exporta e gera os dois ZIPs com as licenças e instruções.
-A pipeline do GitHub valida cada push e pode
-gerar os dois pacotes pela ação manual ou por uma tag `v*`.
-
-## Arte e referências
-
-A direção de jogo tem referências em Project Zomboid, Stardew Valley e
-Resident Evil 4. O protótipo usa sprites e sons produzidos para este projeto,
-sem arquivos extraídos desses jogos. As fontes DejaVu mantêm sua licença em
-[`art/FONT-LICENSE.txt`](art/FONT-LICENSE.txt). As imagens de origem ficam em
-`art/source/`, e `python3 tools/pack_art.py` (com Pillow instalado) extrai as
-texturas e alinha os quadros para o Godot. Para regenerar os sons, execute
-`python3 tools/generate_audio.py`.
-
-O código e os assets próprios não receberam licença pública nesta etapa.
-Consulte [o documento de design](docs/DESIGN.md) e
-[o plano de evolução](docs/ROADMAP.md) antes de ampliar o escopo.
+O código e os sons próprios ainda não receberam licença pública. A arte da
+CraftPix segue a licença do autor e não pode ser redistribuída como asset pack.

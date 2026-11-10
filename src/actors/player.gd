@@ -4,8 +4,8 @@ signal health_changed(value: int)
 
 const SPEED: float = 125.0
 const MAX_HEALTH: int = 100
-const SPRITES: Texture2D = preload("res://art/player.png")
-const PISTOL: Texture2D = preload("res://art/world/pistol.png")
+const KIT = preload("res://src/systems/kit_art.gd")
+const PISTOL: Texture2D = preload("res://art/vendor/craftpix/pistol.png")
 
 var game: Node
 var weapon: WeaponData = preload("res://resources/pistol.tres")
@@ -19,7 +19,8 @@ var footstep_timer: float = 0.0
 var shot_count: int = 0
 var camera: Camera2D
 var recoil: float = 0.0
-var zoom_target: float = 1.8
+var zoom_target: float = 2.0
+var idle_animation: float = 0.0
 
 func _ready() -> void:
 	collision_layer = 2
@@ -42,6 +43,7 @@ func _ready() -> void:
 	add_child(camera)
 
 func _physics_process(delta: float) -> void:
+	idle_animation += delta * 5
 	camera.zoom = Vector2.ONE * lerpf(camera.zoom.x, zoom_target, 1.0 - exp(-delta * 10))
 	cooldown = maxf(0, cooldown - delta)
 	invulnerable = maxf(0, invulnerable - delta)
@@ -75,7 +77,7 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			zoom_target = minf(2.4, zoom_target + .15)
+			zoom_target = minf(3.0, zoom_target + .15)
 			get_viewport().set_input_as_handled()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			zoom_target = maxf(1.0, zoom_target - .15)
@@ -122,7 +124,13 @@ func take_damage(amount: int) -> void:
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0.015, .04, .035, .34))
 	var color := Color("f2c4a2") if invulnerable > 0 and int(invulnerable * 15) % 2 == 0 else Color.WHITE
-	draw_texture_rect_region(SPRITES, Rect2(-32, -62, 64, 64), Rect2((int(animation) % 4) * 64, facing * 64, 64, 64), color)
+	var moving := velocity.length_squared() > 1
+	var texture: Texture2D = KIT.PLAYER_WALK if moving else KIT.PLAYER_IDLE
+	var frame := int(animation if moving else idle_animation)
+	if cooldown > .10:
+		texture = KIT.PLAYER_SHOT
+		frame = mini(2, int((weapon.cooldown - cooldown) * 20))
+	KIT.actor(self, texture, frame, aim.x < 0, color)
 	var shoulder := Vector2(0, -14)
 	draw_set_transform(shoulder + aim * (5 - recoil), aim.angle())
 	draw_texture_rect(PISTOL, Rect2(0, -4, 17, 11), false)

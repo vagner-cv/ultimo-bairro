@@ -1,5 +1,6 @@
 extends Node2D
 
+const ART = preload("res://src/systems/environment_art.gd")
 const PROP = preload("res://src/world/prop.gd")
 const DOOR = preload("res://src/world/door.gd")
 const ROOF = preload("res://src/world/roof.gd")
@@ -21,12 +22,7 @@ var dynamic_obstacles: Array[Node] = []
 var doors: Array[Node] = []
 var houses: Array[Dictionary] = []
 var astar := AStarGrid2D.new()
-var ground: Texture2D = preload("res://art/vendor/craftpix/ground.png")
-const DEBRIS: Array[Texture2D] = [
-	preload("res://art/vendor/craftpix/bottle.png"),
-	preload("res://art/vendor/craftpix/paper.png"),
-	preload("res://art/vendor/craftpix/stone.png")
-]
+const DEBRIS: Array[Texture2D] = [ART.PROPS.leaves, ART.PROPS.rubble, ART.PROPS.leaves]
 var decor: Array[Dictionary] = []
 var random := RandomNumberGenerator.new()
 var spawn_points: Array[Vector2] = [
@@ -40,14 +36,17 @@ var spawn_points: Array[Vector2] = [
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
-	material = preload("res://shaders/soft_pixel.tres")
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	random.randomize()
 	actors = Node2D.new()
 	actors.name = "Actors"
 	actors.y_sort_enabled = true
+	actors.texture_repeat = CanvasItem.TEXTURE_REPEAT_DISABLED
 	add_child(actors)
 	roofs = Node2D.new()
 	roofs.z_index = 90
+	roofs.texture_repeat = CanvasItem.TEXTURE_REPEAT_DISABLED
 	add_child(roofs)
 	var shadows := SHADOW.new()
 	shadows.world = self
@@ -129,6 +128,16 @@ func _build_map() -> void:
 	for y in [900, 1810, 2440]:
 		for x in [120, 600, 1210, 1660, 2700, 3180, 3650, 4490]:
 			add_prop(Rect2(x, y, 20, 16), "tree")
+	# Street dressing uses the same detailed materials as interactive objects.
+	for p in [Vector2(460, 760), Vector2(2830, 730), Vector2(4160, 1650), Vector2(1320, 2640)]:
+		add_prop(Rect2(p, Vector2(126, 44)), "car")
+	for ry in ROAD_Y:
+		for rx in ROAD_X:
+			add_prop(Rect2(rx - 47, ry - 50, 12, 12), "lamp")
+			add_prop(Rect2(rx + 191, ry + 195, 12, 12), "lamp")
+	for p in [Vector2(1670, 1280), Vector2(4420, 2240), Vector2(2740, 2400)]:
+		add_prop(Rect2(p, Vector2(54, 23)), "woodpile")
+	add_prop(Rect2(4120, 2150, 48, 28), "well")
 	var npc := StaticBody2D.new()
 	npc.set_script(SURVIVOR)
 	npc.position = Vector2(466, 548)
@@ -181,6 +190,7 @@ func add_house(rect: Rect2, title: String, color: Color, starting: bool = false)
 			add_prop(Rect2(rect.position + Vector2(x, 170), Vector2(64, 28)), "bench")
 	elif title == "BIBLIOTECA":
 		add_container(Rect2(rect.position + Vector2(36, 160), Vector2(46, 26)), "drawer", "Gaveta de arquivos")
+	_furnish(rect, title)
 	var roof := Node2D.new()
 	roof.set_script(ROOF)
 	roof.position = rect.position
@@ -193,13 +203,18 @@ func add_house(rect: Rect2, title: String, color: Color, starting: bool = false)
 	roofs.add_child(roof)
 
 func add_prop(rect: Rect2, kind: String, color: Color = Color("84907b")) -> StaticBody2D:
+	if kind in ["tree", "bush"]:
+		for house in houses:
+			if house.rect.grow(14).has_point(rect.get_center()):
+				return null
 	var prop := StaticBody2D.new()
 	prop.set_script(PROP)
 	prop.position = Vector2(rect.get_center().x, rect.end.y)
 	prop.size = rect.size
 	prop.kind = kind
+	prop.variant = (absi(int(rect.position.x / 80) + int(rect.position.y / 64)) % 3) if kind == "tree" else houses.size() % 3
 	prop.tint = color
-	prop.collision_layer = 16 if kind in ["bench", "crate", "barrel", "barricade"] else 1
+	prop.collision_layer = 16 if kind in ["bench", "crate", "barrel", "barricade", "sofa", "bed", "hospital_bed", "table", "armchair", "woodpile", "desk"] else 1
 	if prop.collision_layer == 16:
 		prop.add_to_group("platforms")
 	prop.collision_mask = 0
@@ -264,40 +279,32 @@ func has_line_of_sight(from: Vector2, to: Vector2) -> bool:
 	var query := PhysicsRayQueryParameters2D.create(from, to, 1 | 16)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
-func _ground_region(tile: int, point: Vector2) -> Rect2:
-	return Rect2(tile * 128 + posmod(int(point.x), 128), posmod(int(point.y), 128), CELL, CELL)
-
 func _draw() -> void:
-	# A single static canvas batches the ground of the 4x larger neighborhood.
-	for y in range(int(MAP_SIZE.y / CELL)):
-		for x in range(int(MAP_SIZE.x / CELL)):
-			var p := Vector2(x * CELL, y * CELL)
-			var tile := 0
-			for rx in ROAD_X:
-				if p.x >= rx - 32 and p.x < rx + 192:
-					tile = 2
-			for ry in ROAD_Y:
-				if p.y >= ry - 32 and p.y < ry + 192:
-					tile = 2
-			for rx in ROAD_X:
-				if p.x >= rx and p.x < rx + 160:
-					tile = 1
-			for ry in ROAD_Y:
-				if p.y >= ry and p.y < ry + 160:
-					tile = 1
-			if x < 2 or y < 2 or x > int(MAP_SIZE.x / CELL) - 3 or y > int(MAP_SIZE.y / CELL) - 3:
-				tile = 5
-			draw_texture_rect_region(ground, Rect2(p, Vector2(CELL, CELL)), _ground_region(tile, p))
+	# Detailed repeating materials are batched into large quads, keeping the map light.
+	ART.surface(self, ART.GRASS, Rect2(Vector2.ZERO, MAP_SIZE), 256)
+	for rx in ROAD_X:
+		ART.surface(self, ART.PAVING, Rect2(rx - 32, 0, 224, MAP_SIZE.y), 192)
 	for ry in ROAD_Y:
-		for x in range(32, int(MAP_SIZE.x), 64):
-			draw_rect(Rect2(x, ry + 76, 30, 3), Color("a3a287"))
+		ART.surface(self, ART.PAVING, Rect2(0, ry - 32, MAP_SIZE.x, 224), 192)
+	for rx in ROAD_X:
+		ART.surface(self, ART.ASPHALT, Rect2(rx, 0, 160, MAP_SIZE.y), 256)
+	for ry in ROAD_Y:
+		ART.surface(self, ART.ASPHALT, Rect2(0, ry, MAP_SIZE.x, 160), 256)
+	for ry in ROAD_Y:
+		for x in range(32, int(MAP_SIZE.x), 72):
+			var worn := .3 if x % 5 == 0 else .58
+			draw_rect(Rect2(x, ry + 78, 30, 2), Color(.79, .71, .47, worn))
 		for rx in ROAD_X:
 			for i in range(6):
-				draw_rect(Rect2(rx - 55, ry + 9 + i * 25, 19, 12), Color("b0af97"))
-				draw_rect(Rect2(rx + 197, ry + 9 + i * 25, 19, 12), Color("b0af97"))
+				draw_rect(Rect2(rx - 27, ry + 10 + i * 24, 18, 10), Color(.79, .78, .69, .55))
+				draw_rect(Rect2(rx + 169, ry + 10 + i * 24, 18, 10), Color(.79, .78, .69, .55))
 	for rx in ROAD_X:
-		for y in range(48, int(MAP_SIZE.y), 64):
-			draw_rect(Rect2(rx + 78, y, 3, 30), Color("a3a287"))
+		for y in range(40, int(MAP_SIZE.y), 72):
+			draw_rect(Rect2(rx + 78, y, 2, 30), Color(.79, .71, .47, .5))
+	for rx in ROAD_X:
+		for ry in ROAD_Y:
+			draw_texture_rect(ART.PROPS.drain, Rect2(rx + 139, ry - 30, 18, 14), false)
+			draw_texture_rect(ART.PROPS.drain, Rect2(rx - 28, ry + 141, 18, 14), false)
 	for house in houses:
 		var rect: Rect2 = house.rect
 		var road_below: float = MAP_SIZE.y - 48
@@ -306,17 +313,14 @@ func _draw() -> void:
 				road_below = ry - 32
 				break
 		var path := Rect2(Vector2(house.door.x - 32, rect.end.y), Vector2(64, maxf(0, road_below - rect.end.y)))
-		for py in range(int(path.position.y), int(path.end.y), CELL):
-			for px in range(int(path.position.x), int(path.end.x), CELL):
-				draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), _ground_region(2, Vector2(px, py)))
-		for py in range(int(rect.position.y), int(rect.end.y), CELL):
-			for px in range(int(rect.position.x), int(rect.end.x), CELL):
-				draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), _ground_region(3, Vector2(px, py)))
+		if path.size.y > 0:
+			ART.surface(self, ART.PAVING, path, 192, Color(.92, .94, .89))
+		var kind := ART.building_type(house.name)
+		var material: Texture2D = ART.WOOD if kind in [0, 1] else ART.PAVING
+		ART.surface(self, material, rect, 224 if kind == 0 else 160, Color(.88, .85, .79) if kind == 3 else Color.WHITE)
 	for park in [Rect2(1680, 1008, 440, 382), Rect2(3900, 1820, 580, 600)]:
-		for y in range(int(park.position.y), int(park.end.y), CELL):
-			draw_texture_rect_region(ground, Rect2(park.get_center().x, y, CELL, CELL), _ground_region(4, Vector2(park.get_center().x, y)))
-		for x in range(int(park.position.x), int(park.end.x), CELL):
-			draw_texture_rect_region(ground, Rect2(x, park.get_center().y, CELL, CELL), _ground_region(4, Vector2(x, park.get_center().y)))
+		ART.surface(self, ART.PAVING, Rect2(park.get_center().x - 16, park.position.y, 32, park.size.y), 192, Color(.81, .78, .67))
+		ART.surface(self, ART.PAVING, Rect2(park.position.x, park.get_center().y - 16, park.size.x, 32), 192, Color(.81, .78, .67))
 	for item in decor:
 		var p: Vector2 = item.pos
 		var indoors := false
@@ -324,11 +328,41 @@ func _draw() -> void:
 			if house.rect.has_point(p):
 				indoors = true
 				break
-		if not indoors:
-			draw_texture_rect(DEBRIS[item.kind], Rect2(p, Vector2(24, 24)), false)
-	var font := ThemeDB.fallback_font
+		if indoors:
+			continue
+		var texture: Texture2D = DEBRIS[item.kind]
+		var dimensions := Vector2(30, 24) if item.kind != 0 else Vector2(49, 35)
+		draw_set_transform(p, item.rot)
+		draw_texture_rect(texture, Rect2(-dimensions / 2, dimensions), false, Color(1, 1, 1, .7 if item.kind == 0 else .85))
+	draw_set_transform(Vector2.ZERO)
+	var font := preload("res://art/regular.ttf")
 	for district in [[Vector2(480, 781), "RUA DAS ACÁCIAS"], [Vector2(1820, 1280), "PRAÇA AURORA"], [Vector2(2820, 1740), "DISTRITO INDUSTRIAL"], [Vector2(4030, 2130), "PARQUE DAS PALMEIRAS"], [Vector2(2810, 780), "AVENIDA DO COMÉRCIO"]]:
-		draw_string(font, district[0], district[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("a5ab91"))
+		draw_string(font, district[0], district[1], HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(.76, .74, .63, .65))
+
+func _furnish(rect: Rect2, title: String) -> void:
+	var kind := ART.building_type(title)
+	if kind == 0:
+		if rect.size.x >= 288:
+			add_prop(Rect2(rect.position + Vector2(100, 68), Vector2(76, 24)), "sofa")
+		add_prop(Rect2(rect.position + Vector2(38, 116), Vector2(40, 36)), "bed")
+		add_prop(Rect2(rect.position + Vector2(rect.size.x / 2 - 18, 140), Vector2(47, 24)), "table")
+	elif title in ["CLÍNICA", "POSTO DE RESGATE"]:
+		for x in [36, int(rect.size.x) - 90]:
+			add_prop(Rect2(rect.position + Vector2(x, 152), Vector2(43, 38)), "hospital_bed")
+	elif title == "BIBLIOTECA":
+		add_prop(Rect2(rect.position + Vector2(105, 50), Vector2(62, 21)), "bookcase")
+		add_prop(Rect2(rect.position + Vector2(130, 150), Vector2(68, 26)), "desk")
+	elif kind == 3:
+		add_prop(Rect2(rect.position + Vector2(36, 160), Vector2(75, 28)), "workbench")
+		if rect.size.x >= 320:
+			add_prop(Rect2(rect.position + Vector2(120, 50), Vector2(62, 21)), "bookcase")
+	elif title == "DELEGACIA":
+		add_prop(Rect2(rect.position + Vector2(100, 156), Vector2(68, 26)), "desk")
+	else:
+		add_prop(Rect2(rect.position + Vector2(102, 50), Vector2(62, 21)), "bookcase")
+		add_prop(Rect2(rect.position + Vector2(rect.size.x / 2 - 20, 166), Vector2(47, 24)), "table")
+	if rect.size.x >= 288 and kind == 0:
+		add_prop(Rect2(rect.position + Vector2(rect.size.x - 66, rect.size.y - 64), Vector2(22, 18)), "armchair")
 
 func add_container(rect: Rect2, kind: String, caption: String) -> StaticBody2D:
 	var object = CONTAINER.new()

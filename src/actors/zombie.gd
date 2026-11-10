@@ -23,7 +23,7 @@ var memory: float = 0.0
 var idle_animation: float = 0.0
 
 func _ready() -> void:
-	material = preload("res://shaders/soft_pixel.tres")
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	collision_layer = 4
 	collision_mask = 1 | 2 | 4 | 8 | 16
 	add_to_group("zombies")
@@ -132,5 +132,5 @@ func _draw() -> void:
 		left = game.player.global_position.x < global_position.x
 	KIT.actor(self, texture, frame, left, color)
 	if health < max_health:
-		draw_rect(Rect2(-13, -42, 26, 3), Color("253a33"))
-		draw_rect(Rect2(-13, -42, 26.0 * health / max_health, 3), Color("d89b6a"))
+		draw_rect(Rect2(-13, -73, 26, 3), Color("253a33"))
+		draw_rect(Rect2(-13, -73, 26.0 * health / max_health, 3), Color("d89b6a"))

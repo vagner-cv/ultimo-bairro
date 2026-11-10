@@ -10,7 +10,7 @@ var lines: Array[String] = [
 ]
 
 func _ready() -> void:
-	material = preload("res://shaders/soft_pixel.tres")
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	collision_layer = 8
 	collision_mask = 0
 	add_to_group("interactables")
@@ -24,8 +24,8 @@ func _ready() -> void:
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0, 0, 0, .2))
 	KIT.actor(self, KIT.NPC_IDLE, int(idle_animation), false)
-	draw_circle(Vector2(0, -45), 7, Color("d6ba7d"))
-	draw_string(ThemeDB.fallback_font, Vector2(-2, -41), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("31453d"))
+	draw_circle(Vector2(0, -74), 7, Color("d6ba7d"))
+	draw_string(ThemeDB.fallback_font, Vector2(-2, -70), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("31453d"))
 
 func _process(delta: float) -> void:
 	idle_animation += delta * 4

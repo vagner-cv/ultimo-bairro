@@ -17,10 +17,8 @@ func corpse(at: Vector2, tint: Color) -> void:
 	corpses.append({"at": at, "tint": tint, "angle": randf_range(-.6, .6)})
 	var sprite := Sprite2D.new()
 	sprite.texture = KIT.ZOMBIE_DEAD
-	sprite.region_enabled = true
-	sprite.region_rect = Rect2(32, 0, 32, 32)
-	sprite.scale = Vector2(2, 2)
-	sprite.position = at + Vector2(0, -30)
+	sprite.scale = Vector2(.28, .28)
+	sprite.position = at + Vector2(0, -12)
 	sprite.flip_h = corpses[-1].angle < 0
 	sprite.modulate = Color(.85, .85, .85)
 	get_parent().actors.add_child(sprite)

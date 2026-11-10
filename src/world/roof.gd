@@ -1,59 +1,41 @@
 extends Node2D
 
-const KIT = preload("res://src/systems/kit_art.gd")
+const ART = preload("res://src/systems/environment_art.gd")
 var size: Vector2
 var roof_color := Color("51645d")
 var house_name: String
 var player: Node2D
 var entry: Node
-var fade: float = 1.0
+var fade: float = 1
 var variant: int = 0
+
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(player):
 		return
 	var inside := Rect2(global_position, size).grow(24).has_point(player.global_position)
-	fade = move_toward(fade, 0.0 if inside else 1.0, delta * 5.0)
+	fade = move_toward(fade, 0.0 if inside else 1.0, delta * 5)
 	modulate.a = fade
 
 func _draw() -> void:
-	var columns := roundi(size.x / 32)
-	var rows := roundi(size.y / 32)
-	var roof_rows := maxi(3, rows / 2)
-	for y in range(rows):
-		for x in range(columns):
-			var tile := 138
-			if y == 0:
-				tile = 48 if x == 0 else (50 if x == columns - 1 else 49)
-			elif y < roof_rows - 1:
-				tile = 70 if x == 0 else (73 if x == columns - 1 else 94)
-				if x > 0 and x < columns - 1 and (x * 7 + y * 3 + variant) % 9 == 0:
-					tile = 71
-			elif y == roof_rows - 1:
-				tile = 114 if x == 0 else (117 if x == columns - 1 else 116)
-			elif y == rows - 2:
-				tile = 180 if x == 0 else (183 if x == columns - 1 else 181)
-			elif y == rows - 1:
-				tile = 202 if x == 0 else (205 if x == columns - 1 else 203)
-			elif x == 0:
-				tile = 136
-			elif x == columns - 1:
-				tile = 139
-			KIT.tile(self, tile, Vector2(x * 32, y * 32), Color.WHITE.lerp(roof_color, .18))
-	for x in range(1, columns - 1, 2):
-		if absf(x * 32 - size.x / 2) < 36:
-			continue
-		KIT.tile(self, 31, Vector2(x * 32, roof_rows * 32))
-		KIT.tile(self, 53, Vector2(x * 32, (roof_rows + 1) * 32))
-	if variant % 2 == 0:
-		KIT.tile(self, 186, Vector2(32, 32))
-		KIT.tile(self, 208, Vector2(32, 64))
-	var font := ThemeDB.fallback_font
-	var label_width := font.get_string_size(house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11).x
-	var plate := Rect2(size.x / 2 - label_width / 2 - 8, size.y - 92, label_width + 16, 19)
-	draw_rect(plate, Color(.08, .13, .12, .91))
-	draw_string(font, plate.position + Vector2(8, 14), house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("e5e1cd"))
-	KIT.door(self, Vector2(size.x / 2 - 32, size.y - 64), is_instance_valid(entry) and entry.is_open)
-
-func _ready() -> void:
-	material = preload("res://shaders/soft_pixel.tres")
+	var kind := ART.building_type(house_name)
+	var texture: Texture2D = ART.BUILDINGS[kind]
+	# The footprint/door match physics; extra height represents the roof elevation.
+	var bounds := Rect2(-9, -58, size.x + 18, size.y + 58)
+	var color := Color.WHITE.lerp(roof_color, .055)
+	draw_texture_rect(texture, bounds, false, color)
+	if variant % 3 == 0:
+		draw_texture_rect(ART.PROPS.ivy, Rect2(size.x - 67, size.y - 138, 66, 91), false, Color(1, 1, 1, .85))
+	var font := preload("res://art/bold.ttf")
+	var label_width := font.get_string_size(house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+	var plate := Rect2(size.x / 2 - label_width / 2 - 7, size.y - 99, label_width + 14, 17)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(.075, .09, .075, .95)
+	style.border_color = Color(.48, .44, .31, .75)
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(2)
+	draw_style_box(style, plate)
+	draw_string(font, plate.position + Vector2(7, 12), house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e5dfc9"))
+	ART.door(self, Vector2(size.x / 2 - 32, size.y - 68), is_instance_valid(entry) and entry.is_open)

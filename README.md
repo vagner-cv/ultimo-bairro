@@ -2,17 +2,18 @@
 
 Protótipo de sobrevivência para PC em **Godot 4.6.3**. Explore Vila Aurora,
 converse com Mara e sobreviva a ondas crescentes de infectados.
-A versão **0.3.0** amplia o bairro, o combate e a exploração.
+A versão **0.4.0** refaz o cenário em arte pintada detalhada, no mesmo estilo
+do personagem e dos itens.
 
-![Partida com o kit CraftPix integrado](docs/gameplay.png)
+![Partida com o cenário pintado integrado](docs/gameplay.png)
 
 ## Baixar e jogar
 
 Abra [Releases](https://github.com/vagner-cv/ultimo-bairro/releases) e baixe:
 
-- **Windows x64:** `UltimoBairro-0.3.0-Windows.zip`. Extraia tudo e abra
+- **Windows x64:** `UltimoBairro-0.4.0-Windows.zip`. Extraia tudo e abra
   `UltimoBairro.exe`.
-- **Linux x64:** `UltimoBairro-0.3.0-Linux.zip`. Extraia e execute
+- **Linux x64:** `UltimoBairro-0.4.0-Linux.zip`. Extraia e execute
   `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
 Os executáveis não precisam de Godot, Python ou instalação de assets.
@@ -59,8 +60,11 @@ e o caminho. A partida pode ser reiniciada pelo menu de pausa ou após morrer.
 - Inventário sem limite, com listas lado a lado para transferir quantidades,
   pegar tudo, guardar itens, equipar e usar ervas. A faca permanece com o jogador.
 - Pulo com altura e pouso sobre objetos baixos; paredes continuam bloqueando.
-- Sprite próprio do Leon de RE4 em quatro direções, novos ícones, filtro de
-  suavização das diagonais, sombras suaves e sinalização dos prédios.
+- Arte pintada detalhada em terreno, asfalto, calçadas, pisos, fachadas e telhados.
+- Casas, lojas, prédios públicos e galpões com aparências próprias; interiores
+  mobiliados, árvores, cercas, carros abandonados e iluminação dos postes.
+- Leon em quatro direções, Mara e zumbis no mesmo acabamento visual dos itens.
+- Sombras suaves, hera nas fachadas e sinalização dos prédios.
 
 Você começa com pistola, 60 munições 9 mm, faca e uma erva. O armário da primeira
 casa contém um fuzil; a caixa de madeira tem uma escopeta. A mira é livre em 360°.
@@ -72,35 +76,18 @@ há salvamento entre sessões, multiplayer ou fome/sede.
 
 ## Abrir o código no Godot
 
-1. Instale [Godot 4.6.3 Standard](https://godotengine.org/download/archive/4.6.3-stable/)
-   e Python 3.10 ou superior.
-2. Clone este repositório.
-3. Prepare os assets gratuitos do autor:
+1. Instale [Godot 4.6.3 Standard](https://godotengine.org/download/archive/4.6.3-stable/).
+2. Clone o repositório e importe `project.godot`.
+3. Pressione **F5**.
 
-```sh
-python3 -m venv .venv
-# Linux/macOS: source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-python -m pip install -r requirements-tools.txt
-python tools/prepare_assets.py
-```
-
-Também é possível baixar o ZIP gratuito na página do autor e executar:
-
-```sh
-python tools/prepare_assets.py --archive /caminho/para/o/kit.zip
-```
-
-4. Importe `project.godot` no Godot e pressione **F5**.
-
-A arte licenciada fica em `art/vendor/`, ignorada pelo Git. O código de
-preparação baixa o arquivo público do autor, verifica seu SHA-256 e prepara
-apenas os PNGs usados pelo jogo. Os PNGs não acompanham os arquivos de código
-do GitHub; os executáveis incluem a arte embutida na partida.
+A arte atual acompanha o código. Não é necessário instalar plugin, biblioteca
+ou baixar um kit para abrir o projeto. Python só é necessário para os scripts
+de empacotamento e ferramentas de desenvolvimento. `tools/prepare_assets.py`
+permanece como ferramenta histórica da versão CraftPix, sem uso na versão atual.
 
 ## Validar e exportar
 
-Depois de preparar os assets:
+No diretório do projeto:
 
 ```sh
 godot --headless --path . --editor --import --quit
@@ -120,10 +107,11 @@ pela execução manual ou por uma tag `v*`.
 `src/systems/` armas/áudio/arte, e `src/ui/` a interface. As armas são configuradas
 em `resources/*.tres`; itens, inventário e loot ficam em `src/systems/`.
 
-- Arte: [Free Zombie Apocalypse Top-Down Pixel Art Kit — CraftPix](https://free-game-assets.itch.io/free-zombie-apocalypse-top-down-pixel-art-kit).
-- [Aviso de uso da CraftPix](art/CRAFTPIX-NOTICE.txt), [fontes DejaVu](art/FONT-LICENSE.txt)
-  e [Godot](art/GODOT-LICENSE.txt).
-- [Design](docs/DESIGN.md), [evolução](docs/ROADMAP.md) e [validação](docs/VALIDATION.md).
+- Arte pintada gerada para o projeto: `art/environment/` e `art/survival/`.
+- Fontes [DejaVu](art/FONT-LICENSE.txt) e motor [Godot](art/GODOT-LICENSE.txt).
+- [Arte e proveniência](art/README.md), [design](docs/DESIGN.md),
+  [evolução](docs/ROADMAP.md) e [validação](docs/VALIDATION.md).
 
-O código e os sons próprios ainda não receberam licença pública. A arte da
-CraftPix segue a licença do autor e não pode ser redistribuída como asset pack.
+O código, os sons e a arte do projeto ainda não receberam licença pública.
+O cenário CraftPix das versões anteriores continua no histórico; seus PNGs
+não são usados nem incluídos nos pacotes atuais.

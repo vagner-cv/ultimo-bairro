@@ -175,7 +175,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("graphics"):
 		smooth_graphics = not smooth_graphics
 		_apply_graphics()
-		notify("Filtro suave" if smooth_graphics else "Pixel art clássico")
+		notify("Filtro suave" if smooth_graphics else "Texturas nítidas")
 	elif event.is_action_pressed("interact") and not get_tree().paused:
 		if dialogue_active:
 			advance_dialogue()
@@ -275,8 +275,6 @@ func _spawn_zombie(at: Vector2) -> void:
 	zombie.game = self
 	zombie.position = at
 	world.actors.add_child(zombie)
-	if not smooth_graphics:
-		zombie.material = null
 
 func _update_waves(delta: float) -> void:
 	if wave_countdown >= 0:
@@ -355,10 +353,9 @@ func toggle_map() -> void:
 	player.cooldown = maxf(player.cooldown, .25)
 
 func _apply_graphics() -> void:
-	world.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth_graphics else CanvasItem.TEXTURE_FILTER_NEAREST
-	player.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	var smoothing = preload("res://shaders/soft_pixel.tres") if smooth_graphics else null
-	world.material = smoothing
+	world.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if smooth_graphics else CanvasItem.TEXTURE_FILTER_LINEAR
+	world.material = null
+	player.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	for object in world.actors.get_children() + world.roofs.get_children():
-		if object.get_script() in [ZOMBIE, preload("res://src/world/prop.gd"), preload("res://src/world/roof.gd"), preload("res://src/actors/survivor.gd")]:
-			object.material = smoothing
+		object.material = null
+		object.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if smooth_graphics else CanvasItem.TEXTURE_FILTER_LINEAR

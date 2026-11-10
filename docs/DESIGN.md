@@ -1,4 +1,4 @@
-# Último Bairro — design 0.3
+# Último Bairro — design 0.4
 
 Sobrevivência em um bairro pós-apocalíptico visto de cima. A primeira versão
 expandida mantém uma área finita, um personagem e Mara, com exploração e combate.
@@ -27,3 +27,9 @@ A navegação dos zumbis sempre considera plataformas, portas fechadas e paredes
 Mapa: 4608×3072, 27 interiores. Tab mostra a planta completa e a posição atual.
 Inventário e mapa pausam a simulação. Esc fecha a janela atual antes da pausa.
 Reiniciar limpa o mundo, inventário, loot, contador e ondas. Sem save persistente.
+
+A apresentação 0.4 usa materiais pintados e sprites detalhados. O renderer do
+terreno desenha grandes quads repetidos em vez de milhares de tiles pequenos.
+As plantas, portas e colisões mantêm a mesma escala; fachadas/telhados são sprites
+por categoria e os interiores recebem mobília física. Os sprites novos de Mara
+e zumbis usam frames 128×192, com pés alinhados ao mesmo ponto físico do Leon.

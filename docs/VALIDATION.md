@@ -1,4 +1,4 @@
-# Validação da versão 0.3.0
+# Validação da versão 0.4.0
 
 80/80 verificações em `tests/run_tests.gd`: movimentação normalizada, paredes,
 portas e navegação, tiro/oclusão, perseguição/ataque, diálogo, pausa, morte,
@@ -15,3 +15,8 @@ X11: início, I, Tab, pulo, faca, movimentação, porta, NPC, tiro, pausa,
 reinício e saída. Os pacotes Windows/Linux embutem o PCK e os avisos de licença.
 Windows foi exportado em Linux; seu funcionamento nativo precisa ser validado
 em uma máquina Windows. Não foi feita medição em hardware antigo.
+
+A versão 0.4 substitui toda a arte do cenário e dos coadjuvantes. A revisão visual
+confere fachadas, portas abertas/fechadas, interiores, mobília, terreno repetido,
+vegetação e iluminação no renderer Compatibility. O checkout atual abre sem
+preparação ou download de gráficos externos; a pipeline não usa mais o kit antigo.

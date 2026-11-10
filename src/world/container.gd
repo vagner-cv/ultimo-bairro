@@ -3,8 +3,6 @@ extends StaticBody2D
 const INVENTORY = preload("res://src/systems/inventory.gd")
 const ITEMS = preload("res://src/systems/items.gd")
 const SHADOW = preload("res://src/systems/shadows.gd")
-const DUMPSTER: Texture2D = preload("res://art/vendor/craftpix/dumpster.png")
-const BENCH: Texture2D = preload("res://art/vendor/craftpix/bench.png")
 const ART := {"locker": preload("res://art/survival/locker.png"), "locker_open": preload("res://art/survival/locker_open.png"), "wood": preload("res://art/survival/wood.png"), "cardboard": preload("res://art/survival/cardboard.png"), "drawer": preload("res://art/survival/drawer.png"), "drawer_open": preload("res://art/survival/drawer_open.png"), "dumpster": preload("res://art/survival/dumpster.png"), "dumpster_open": preload("res://art/survival/dumpster_open.png")}
 var game: Node
 var kind: String = "locker"
@@ -80,7 +78,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	SHADOW.draw_contact(self, Vector2(7, -3), size * Vector2(1.6, 1.0))
 	if broken:
-		draw_texture_rect(preload("res://art/vendor/craftpix/paper.png"), Rect2(-22, -16, 44, 20), false, Color(.68, .55, .4))
+		draw_texture_rect(preload("res://art/environment/rubble.png"), Rect2(-22, -16, 44, 20), false, Color(.68, .55, .4))
 		return
 	var color := Color(1.5, 1.3, 1.1) if flash > 0 else Color.WHITE
 	if kind in ["dumpster", "drawer"]:

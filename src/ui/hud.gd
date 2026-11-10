@@ -189,7 +189,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.3.0  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.4.0  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:
@@ -198,7 +198,7 @@ func _draw_help(w: float, h: float) -> void:
 	panel(Rect2(x, y, 540, 540))
 	text_at("ANTES DE SAIR", Vector2(x + 40, y + 42), 12, ACCENT, true)
 	text_at("Conheça os controles", Vector2(x + 40, y + 81), 26, PAPER, true)
-	var controls := [["WASD / SETAS", "Caminhar"], ["MOUSE / RODA", "Mirar / zoom"], ["BOTÃO ESQUERDO", "Disparar arma equipada"], ["F / BOTÃO DIREITO", "Faca / cortar caixas"], ["ESPAÇO", "Pular / subir em obstáculos baixos"], ["E", "Portas / recipientes / conversar"], ["I / TAB", "Inventário / mapa do bairro"], ["1 / 2 / 3 / 4", "Pistola / escopeta / fuzil / faca"], ["H", "Usar erva verde (+45 de vida)"], ["ESC / M / F11", "Pausa / som / tela cheia"], ["F2", "Alternar filtro suave / pixel clássico"]]
+	var controls := [["WASD / SETAS", "Caminhar"], ["MOUSE / RODA", "Mirar / zoom"], ["BOTÃO ESQUERDO", "Disparar arma equipada"], ["F / BOTÃO DIREITO", "Faca / cortar caixas"], ["ESPAÇO", "Pular / subir em obstáculos baixos"], ["E", "Portas / recipientes / conversar"], ["I / TAB", "Inventário / mapa do bairro"], ["1 / 2 / 3 / 4", "Pistola / escopeta / fuzil / faca"], ["H", "Usar erva verde (+45 de vida)"], ["ESC / M / F11", "Pausa / som / tela cheia"], ["F2", "Filtro de texturas suave / nítido"]]
 	for i in range(controls.size()):
 		var row_y: float = y + 120 + i * 26
 		text_at(controls[i][0], Vector2(x + 30, row_y), 10, ACCENT, true)

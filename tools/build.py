@@ -7,7 +7,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "builds"
 LOGS = BUILD / "logs"
-VERSION = "0.3.0"
+VERSION = "0.4.0"
 
 
 def run(name, arguments):
@@ -22,8 +22,8 @@ def run(name, arguments):
 
 
 def main():
-    if not (ROOT / "art/vendor/craftpix/tiles.png").exists():
-        raise SystemExit("Prepare artwork first: python tools/prepare_assets.py")
+    if not (ROOT / "art/environment/house.png").exists():
+        raise SystemExit("Missing project artwork: art/environment/house.png")
     LOGS.mkdir(parents=True, exist_ok=True)
     (BUILD / ".gdignore").touch()
     run("import", ["--editor", "--import", "--quit"])
@@ -35,14 +35,19 @@ def main():
         folder = BUILD / platform.lower()
         folder.mkdir(exist_ok=True)
         run(f"export-{platform.lower()}", ["--export-release", preset, str(folder / executable)])
-        for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt", "CRAFTPIX-NOTICE.txt"]:
+        legacy_notice = folder / "CRAFTPIX-NOTICE.txt"
+        if legacy_notice.exists():
+            legacy_notice.unlink()
+        for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt"]:
             shutil.copy(ROOT / "art" / notice, folder / notice)
         (folder / "LEIA-ME.txt").write_text(
-            "ÚLTIMO BAIRRO — PROTÓTIPO 0.3.0\n\n"
+            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.0\n\n"
             "Extraia todos os arquivos antes de jogar.\n"
             f"Abra {executable}. Não precisa instalar Godot.\n\n"
             "WASD ou setas: caminhar\nMouse: mirar\nBotão esquerdo: atirar (segure para repetir)\n"
-            "Roda do mouse: zoom\nE: portas e conversa\nEsc: pausa / encerrar diálogo\nM: áudio\nF11: tela cheia\n\n"
+            "Roda: zoom\nE: portas, recipientes e conversa\nI: inventário\nTab: mapa\n"
+            "Espaço: pular\nF ou botão direito: faca\nH: erva\n1/2/3/4: armas\n"
+            "Esc: fechar / pausar\nM: áudio\nF2: filtro de texturas\nF11: tela cheia\n\n"
             "Você começa na casa 07. Use E perto da porta para sair.\n"
             "Mara está no jardim à direita. A primeira onda tem 18 infectados.\n"
             "Cada onda seguinte traz mais 8 infectados, após 12 segundos de intervalo.\n"
@@ -50,7 +55,7 @@ def main():
             "Abra armários, gavetas e lixeiras com E. Corte caixas com a faca.\n"
             "Organize os itens no inventário; sem limite de carregamento.\n"
             "O conteúdo dos recipientes persiste durante a partida. Não há salvamento.\n\n"
-            "Arte: CraftPix.net, kit gratuito Zombie Apocalypse.\nMotor Godot; fontes DejaVu.\n"
+            "Arte pintada gerada para o projeto.\nMotor Godot; fontes DejaVu.\n"
             "As licenças dessas dependências acompanham este pacote.\n",
             encoding="utf-8")
         package = BUILD / f"UltimoBairro-{VERSION}-{platform}.zip"

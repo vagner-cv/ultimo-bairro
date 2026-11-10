@@ -18,6 +18,8 @@ func capture() -> void:
 	await create_timer(.7).timeout
 	await save_frame("res://docs/title.png")
 	game.begin()
+	for enemy in get_nodes_in_group("zombies"):
+		enemy.set_physics_process(false)
 	await create_timer(.7).timeout
 	await save_frame("res://docs/interior.png")
 	game.world.doors[0].interact(game.player)
@@ -42,8 +44,11 @@ func capture() -> void:
 	game.player.position = Vector2(800, 630)
 	game.player.camera.reset_smoothing()
 	await create_timer(.3).timeout
+	var target = get_nodes_in_group("zombies")[0]
+	target.position = Vector2(950, 630)
+	await create_timer(.05).timeout
 	game.player.cooldown = 0
-	game.player.fire_at(Vector2(875, 640))
+	game.player.fire_at(target.position + Vector2(0, -14))
 	await save_frame("res://docs/combat.png")
 	var locker = game.get_tree().get_nodes_in_group("containers").filter(func(n: Node) -> bool: return n.kind == "locker")[0]
 	game.player.position = locker.position + Vector2(0, 42)

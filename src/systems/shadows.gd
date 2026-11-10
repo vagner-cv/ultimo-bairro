@@ -19,3 +19,20 @@ static func texture() -> Texture2D:
 
 static func draw_contact(canvas: CanvasItem, at: Vector2, size: Vector2 = Vector2(36, 17), alpha: float = 1.0) -> void:
 	canvas.draw_texture_rect(texture(), Rect2(at - size / 2, size), false, Color(1, 1, 1, alpha))
+
+static var glow: Texture2D
+
+static func glow_texture() -> Texture2D:
+	if glow == null:
+		var gradient := Gradient.new()
+		gradient.colors = PackedColorArray([Color(1, 1, 1, .7), Color(1, 1, 1, .12), Color(1, 1, 1, 0)])
+		gradient.offsets = PackedFloat32Array([0, .35, 1])
+		var light := GradientTexture2D.new()
+		light.gradient = gradient
+		light.width = 256
+		light.height = 256
+		light.fill = GradientTexture2D.FILL_RADIAL
+		light.fill_from = Vector2(.5, .5)
+		light.fill_to = Vector2(1, .5)
+		glow = light
+	return glow

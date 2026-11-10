@@ -4,7 +4,7 @@ signal changed
 var is_open: bool = false
 var caption: String = "Porta"
 var collision: CollisionShape2D
-const KIT = preload("res://src/systems/kit_art.gd")
+const KIT = preload("res://src/systems/environment_art.gd")
 
 func _ready() -> void:
 	collision_layer = 1

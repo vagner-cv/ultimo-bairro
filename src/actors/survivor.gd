@@ -21,10 +21,9 @@ func _ready() -> void:
 
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0, 0, 0, .2))
-	draw_texture_rect_region(texture, Rect2(-16, -30, 32, 32), Rect2(0, 0, 32, 32))
-	draw_rect(Rect2(-5, -42, 10, 9), Color("d6ba7d"))
-	draw_rect(Rect2(-1, -40, 2, 3), Color("31453d"))
-	draw_rect(Rect2(-1, -36, 2, 1), Color("31453d"))
+	draw_texture_rect_region(texture, Rect2(-32, -62, 64, 64), Rect2(0, 0, 64, 64))
+	draw_circle(Vector2(0, -57), 7, Color("d6ba7d"))
+	draw_string(ThemeDB.fallback_font, Vector2(-2, -53), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("31453d"))
 
 func interaction_text() -> String:
 	return "Conversar com Mara"

@@ -118,7 +118,7 @@ func take_damage(amount: int, direction: Vector2 = Vector2.ZERO) -> void:
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0.015, .04, .035, .3))
 	var color := Color(1.6, 1.4, 1.2) if flash > 0 else tint
-	draw_texture_rect_region(SPRITES, Rect2(-16, -30, 32, 32), Rect2((int(animation) % 4) * 32, facing * 32, 32, 32), color)
+	draw_texture_rect_region(SPRITES, Rect2(-32, -62, 64, 64), Rect2((int(animation) % 4) * 64, facing * 64, 64, 64), color)
 	if health < max_health:
-		draw_rect(Rect2(-13, -38, 26, 3), Color("253a33"))
-		draw_rect(Rect2(-13, -38, 26.0 * health / max_health, 3), Color("d89b6a"))
+		draw_rect(Rect2(-13, -53, 26, 3), Color("253a33"))
+		draw_rect(Rect2(-13, -53, 26.0 * health / max_health, 3), Color("d89b6a"))

@@ -16,6 +16,9 @@ var doors: Array[Node] = []
 var houses: Array[Dictionary] = []
 var astar := AStarGrid2D.new()
 var ground: Texture2D = preload("res://art/ground.png")
+const GRASS: Texture2D = preload("res://art/world/grass.png")
+const RUBBLE: Texture2D = preload("res://art/world/rubble.png")
+const BRANCHES: Texture2D = preload("res://art/world/branches.png")
 var decor: Array[Dictionary] = []
 var random := RandomNumberGenerator.new()
 var spawn_points: Array[Vector2] = [
@@ -106,6 +109,7 @@ func add_house(rect: Rect2, title: String, color: Color, starting: bool = false)
 	roof.size = rect.size
 	roof.house_name = title
 	roof.roof_color = color
+	roof.variant = [0, 1, 3, 4, 2][houses.size() - 1]
 	roofs.add_child(roof)
 
 func add_prop(rect: Rect2, kind: String, color: Color = Color("84907b")) -> StaticBody2D:
@@ -175,6 +179,9 @@ func has_line_of_sight(from: Vector2, to: Vector2) -> bool:
 	var query := PhysicsRayQueryParameters2D.create(from, to, 1)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
+func _ground_region(tile: int, point: Vector2) -> Rect2:
+	return Rect2(tile * 128 + posmod(int(point.x), 128), posmod(int(point.y), 128), CELL, CELL)
+
 func _draw() -> void:
 	# Ground is one static CanvasItem, rather than thousands of individual nodes.
 	for y in range(int(MAP_SIZE.y / CELL)):
@@ -187,7 +194,7 @@ func _draw() -> void:
 				tile = 2
 			elif x < 2 or y < 2 or x > 69 or y > 45:
 				tile = 5
-			draw_texture_rect_region(ground, Rect2(p, Vector2(CELL, CELL)), Rect2(tile * CELL, 0, CELL, CELL))
+			draw_texture_rect_region(ground, Rect2(p, Vector2(CELL, CELL)), _ground_region(tile, p))
 	for x in range(32, int(MAP_SIZE.x), 64):
 		draw_rect(Rect2(x, 716, 30, 3), Color("a3a287"))
 	for y in range(48, int(MAP_SIZE.y), 64):
@@ -203,23 +210,29 @@ func _draw() -> void:
 			draw_rect(path.grow(4), Color("5e624b"))
 			for py in range(int(path.position.y), int(path.end.y), CELL):
 				for px in range(int(path.position.x), int(path.end.x), CELL):
-					draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), Rect2(64, 0, CELL, CELL))
+					draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), _ground_region(2, Vector2(px, py)))
 		for py in range(int(rect.position.y), int(rect.end.y), CELL):
 			for px in range(int(rect.position.x), int(rect.end.x), CELL):
-				draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), Rect2(96, 0, CELL, CELL))
-		draw_rect(Rect2(rect.position + Vector2(98, 90), Vector2(104, 76)), Color("64756c"))
-		draw_rect(Rect2(rect.position + Vector2(102, 94), Vector2(96, 68)), Color("798477"), false, 2)
+				draw_texture_rect_region(ground, Rect2(px, py, CELL, CELL), _ground_region(3, Vector2(px, py)))
 	# A quiet park, with a looping dirt path.
-	draw_rect(Rect2(1784, 1008, 32, 382), Color("7e7256"))
-	draw_rect(Rect2(1784, 1190, 300, 32), Color("7e7256"))
+	for y in range(1008, 1390, CELL):
+		draw_texture_rect_region(ground, Rect2(1784, y, CELL, CELL), _ground_region(4, Vector2(1784, y)))
+	for x in range(1784, 2084, CELL):
+		draw_texture_rect_region(ground, Rect2(x, 1190, CELL, CELL), _ground_region(4, Vector2(x, 1190)))
 	for item in decor:
 		var p: Vector2 = item.pos
+		var indoors := false
+		for house in houses:
+			if house.rect.has_point(p):
+				indoors = true
+		if indoors:
+			continue
 		if item.kind == 0:
-			draw_rect(Rect2(p, Vector2(3, 2)), Color("a49c74"))
+			draw_texture_rect(GRASS, Rect2(p, Vector2(24, 21)), false)
 		elif item.kind == 1:
-			draw_line(p, p + Vector2(8, 3), Color(.15, .22, .18, .4), 1)
+			draw_texture_rect(RUBBLE, Rect2(p, Vector2(21, 16)), false)
 		else:
-			draw_rect(Rect2(p, Vector2(2, 4)), Color(.34, .42, .29, .6))
+			draw_texture_rect(BRANCHES, Rect2(p, Vector2(27, 18)), false)
 	var font := ThemeDB.fallback_font
 	draw_string(font, Vector2(480, 781), "RUA DAS ACÁCIAS", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("a5ab91"))
 	draw_string(font, Vector2(1820, 1280), "PRAÇA AURORA", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("9ba887"))

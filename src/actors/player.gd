@@ -5,6 +5,7 @@ signal health_changed(value: int)
 const SPEED: float = 125.0
 const MAX_HEALTH: int = 100
 const SPRITES: Texture2D = preload("res://art/player.png")
+const PISTOL: Texture2D = preload("res://art/world/pistol.png")
 
 var game: Node
 var weapon: WeaponData = preload("res://resources/pistol.tres")
@@ -18,6 +19,7 @@ var footstep_timer: float = 0.0
 var shot_count: int = 0
 var camera: Camera2D
 var recoil: float = 0.0
+var zoom_target: float = 1.8
 
 func _ready() -> void:
 	collision_layer = 2
@@ -29,7 +31,8 @@ func _ready() -> void:
 	collision.position.y = -6
 	add_child(collision)
 	camera = Camera2D.new()
-	camera.zoom = Vector2(2, 2)
+	camera.zoom = Vector2.ONE * zoom_target
+	camera.position = Vector2(0, -20)
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 8
 	camera.limit_left = 0
@@ -39,6 +42,7 @@ func _ready() -> void:
 	add_child(camera)
 
 func _physics_process(delta: float) -> void:
+	camera.zoom = Vector2.ONE * lerpf(camera.zoom.x, zoom_target, 1.0 - exp(-delta * 10))
 	cooldown = maxf(0, cooldown - delta)
 	invulnerable = maxf(0, invulnerable - delta)
 	recoil = move_toward(recoil, 0, delta * 18)
@@ -67,6 +71,15 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_pressed("shoot"):
 		fire_at(get_global_mouse_position())
 	queue_redraw()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_target = minf(2.4, zoom_target + .15)
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_target = maxf(1.0, zoom_target - .15)
+			get_viewport().set_input_as_handled()
 
 func fire_at(target: Vector2) -> Dictionary:
 	if cooldown > 0 or health <= 0 or game.dialogue_active or get_tree().paused:
@@ -109,11 +122,8 @@ func take_damage(amount: int) -> void:
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0.015, .04, .035, .34))
 	var color := Color("f2c4a2") if invulnerable > 0 and int(invulnerable * 15) % 2 == 0 else Color.WHITE
-	draw_texture_rect_region(SPRITES, Rect2(-16, -30, 32, 32), Rect2((int(animation) % 4) * 32, facing * 32, 32, 32), color)
+	draw_texture_rect_region(SPRITES, Rect2(-32, -62, 64, 64), Rect2((int(animation) % 4) * 64, facing * 64, 64, 64), color)
 	var shoulder := Vector2(0, -14)
-	var hand := shoulder + aim * (9 - recoil)
-	var muzzle := shoulder + aim * (20 - recoil)
-	draw_line(shoulder + aim.orthogonal() * 4, hand, Color("947250"), 5)
-	draw_line(hand, muzzle, Color("25383a"), 4)
-	draw_line(hand + Vector2(0, -1), muzzle + Vector2(0, -1), Color("9ca89b"), 1)
-	draw_rect(Rect2(hand - Vector2(2, 2), Vector2(4, 4)), Color("d5ae82"))
+	draw_set_transform(shoulder + aim * (5 - recoil), aim.angle())
+	draw_texture_rect(PISTOL, Rect2(0, -4, 17, 11), false)
+	draw_set_transform(Vector2.ZERO)

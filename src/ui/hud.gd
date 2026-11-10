@@ -6,6 +6,7 @@ const ACCENT := Color("dfb579")
 const DARK := Color("142723")
 const REGULAR: Font = preload("res://art/regular.ttf")
 const BOLD: Font = preload("res://art/bold.ttf")
+const PISTOL: Texture2D = preload("res://art/world/pistol.png")
 
 var game: Node
 var screen: String = "title"
@@ -186,7 +187,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.1  /  ARTE PROVISÓRIA", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.1.1  /  ARTE REVISADA", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:
@@ -195,7 +196,7 @@ func _draw_help(w: float, h: float) -> void:
 	panel(Rect2(x, y, 540, 540))
 	text_at("ANTES DE SAIR", Vector2(x + 40, y + 42), 12, ACCENT, true)
 	text_at("Conheça os controles", Vector2(x + 40, y + 81), 26, PAPER, true)
-	var controls := [["W A S D / SETAS", "Caminhar"], ["MOUSE", "Mirar em qualquer direção"], ["BOTÃO ESQUERDO", "Atirar / segure para repetir"], ["E", "Abrir portas / conversar"], ["ESC", "Pausar / fechar diálogo"], ["M", "Ligar ou desligar o som"], ["F11", "Alternar tela cheia"]]
+	var controls := [["W A S D / SETAS", "Caminhar"], ["MOUSE / RODA", "Mirar / ajustar zoom"], ["BOTÃO ESQUERDO", "Atirar / segure para repetir"], ["E", "Abrir portas / conversar"], ["ESC", "Pausar / fechar diálogo"], ["M", "Ligar ou desligar o som"], ["F11", "Alternar tela cheia"]]
 	for i in range(controls.size()):
 		var row_y: float = y + 129 + i * 39
 		text_at(controls[i][0], Vector2(x + 40, row_y), 11, ACCENT, true)
@@ -232,8 +233,7 @@ func _draw_game(w: float, h: float) -> void:
 	draw_rect(Rect2(84, h - 60, 184.0 * game.player.health / 100.0, 8), health_color)
 	text_at("EM MOVIMENTO" if game.player.velocity.length() > 0 else "MANTENHA A CALMA", Vector2(84, h - 34), 9, MUTED)
 	panel(Rect2(w - 276, h - 144, 252, 74))
-	draw_rect(Rect2(w - 256, h - 118, 43, 10), Color("a3afa2"))
-	draw_rect(Rect2(w - 239, h - 110, 10, 16), Color("7c8c7b"))
+	draw_texture_rect(PISTOL, Rect2(w - 260, h - 123, 52, 35), false)
 	text_at("PISTOLA 9 mm", Vector2(w - 195, h - 116), 11, MUTED, true)
 	text_at("∞", Vector2(w - 198, h - 84), 29, ACCENT, true)
 	text_at("MUNIÇÃO INFINITA", Vector2(w - 164, h - 88), 9, PAPER)

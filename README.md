@@ -4,14 +4,14 @@ Um protótipo de sobrevivência pós-apocalíptica para PC: explore Vila Aurora,
 converse com uma sobrevivente e enfrente os infectados com uma pistola de
 munição infinita. Desenvolvido em **Godot 4.6.3**, com visão de cima em 2D.
 
-![Uma rua de Vila Aurora](docs/gameplay.png)
+![Vila Aurora com a arte revisada](docs/overview.png)
 
 ## Jogar
 
-**Windows x64:** extraia `UltimoBairro-0.1.0-Windows.zip` e abra
+**Windows x64:** extraia `UltimoBairro-0.1.1-Windows.zip` e abra
 `UltimoBairro.exe`. Não precisa instalar Godot.
 
-**Linux x64:** extraia `UltimoBairro-0.1.0-Linux.zip` e execute
+**Linux x64:** extraia `UltimoBairro-0.1.1-Linux.zip` e execute
 `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
 Os pacotes são gerados em `builds/`; os executáveis não ficam no histórico Git.
@@ -39,6 +39,7 @@ godot --path .
 | --- | --- |
 | Caminhar | WASD ou setas |
 | Mirar | Mouse, em qualquer direção |
+| Ajustar o zoom | Roda do mouse |
 | Atirar | Botão esquerdo; segure para repetir |
 | Abrir/fechar portas, conversar, avançar fala | E |
 | Pausar ou encerrar conversa | Esc |
@@ -57,8 +58,8 @@ fechadas bloqueiam disparos e a passagem dos zumbis.
 - Cinco construções com portas físicas e interiores acessíveis.
 - Ruas, praça, árvores, cercas, barricadas e carros abandonados.
 - Uma NPC com diálogo, minimapa, menus, efeitos e áudio.
-- Arte provisória original em pixel art; protagonista com jaqueta e cabelo
-  claro, usando a direção visual de um agente de ação como referência.
+- Sprites ilustrados para casas, árvores, veículos, móveis e personagens,
+  com quatro direções de movimento e terreno texturizado.
 
 **Não implementados nesta etapa:** coleta, inventário, saque de corpos/móveis,
 outras armas, munição finita, fome/sede, salvamento, multiplayer e mundo infinito.
@@ -118,8 +119,10 @@ gerar os dois pacotes pela ação manual ou por uma tag `v*`.
 A direção de jogo tem referências em Project Zomboid, Stardew Valley e
 Resident Evil 4. O protótipo usa sprites e sons produzidos para este projeto,
 sem arquivos extraídos desses jogos. As fontes DejaVu mantêm sua licença em
-[`art/FONT-LICENSE.txt`](art/FONT-LICENSE.txt). Para regenerar as imagens e sons,
-instale Pillow em um ambiente Python e execute `python3 tools/generate_assets.py`.
+[`art/FONT-LICENSE.txt`](art/FONT-LICENSE.txt). As imagens de origem ficam em
+`art/source/`, e `python3 tools/pack_art.py` (com Pillow instalado) extrai as
+texturas e alinha os quadros para o Godot. Para regenerar os sons, execute
+`python3 tools/generate_audio.py`.
 
 O código e os assets próprios não receberam licença pública nesta etapa.
 Consulte [o documento de design](docs/DESIGN.md) e

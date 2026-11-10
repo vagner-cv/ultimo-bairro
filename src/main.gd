@@ -26,6 +26,7 @@ var started: bool = false
 var quitting: bool = false
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	get_tree().auto_accept_quit = false
 	_setup_inputs()
 	audio = AUDIO.new()

@@ -17,3 +17,5 @@
   `tools/capture_preview.gd` registra uma sequência no próprio Godot.
 - Não versionar `.godot/`, executáveis, credenciais ou pacotes de builds.
 - Evite adicionar bibliotecas e frameworks até haver uma necessidade concreta.
+- Preserve a arte ilustrada de `art/source/`, empacotada por `tools/pack_art.py`.
+  Não substitua personagens ou objetos ilustrados por figuras geométricas.

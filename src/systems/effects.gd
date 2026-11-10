@@ -2,6 +2,7 @@ extends Node2D
 
 var entries: Array[Dictionary] = []
 var corpses: Array[Dictionary] = []
+const ZOMBIE: Texture2D = preload("res://art/zombie.png")
 
 func tracer(start: Vector2, end: Vector2, hit: bool) -> void:
 	entries.append({"kind": "shot", "a": start, "b": end, "life": .12, "max": .12, "hit": hit})
@@ -13,6 +14,14 @@ func blood(at: Vector2, direction: Vector2) -> void:
 
 func corpse(at: Vector2, tint: Color) -> void:
 	corpses.append({"at": at, "tint": tint, "angle": randf_range(-.6, .6)})
+	var sprite := Sprite2D.new()
+	sprite.texture = ZOMBIE
+	sprite.region_enabled = true
+	sprite.region_rect = Rect2(0, 0, 64, 64)
+	sprite.position = at + Vector2(0, -10)
+	sprite.rotation = PI / 2 + corpses[-1].angle
+	sprite.modulate = Color(.7, .66, .59)
+	get_parent().actors.add_child(sprite)
 
 func _process(delta: float) -> void:
 	for i in range(entries.size() - 1, -1, -1):
@@ -24,12 +33,6 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	for body in corpses:
-		var p: Vector2 = body.at
-		draw_circle(p, 13, Color(.23, .14, .12, .35))
-		draw_rect(Rect2(p + Vector2(-13, -6), Vector2(26, 10)), Color(body.tint).darkened(.25))
-		draw_rect(Rect2(p + Vector2(10, -5), Vector2(8, 8)), Color("7a8263"))
-		draw_rect(Rect2(p + Vector2(-19, -5), Vector2(9, 4)), Color("2b3d3b"))
 	for entry in entries:
 		var alpha: float = entry.life / entry.max
 		if entry.kind == "shot":

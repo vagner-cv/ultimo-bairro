@@ -1,6 +1,10 @@
-# Validação da entrega 0.1.0
+# Validação da entrega 0.1.1
 
 Validado em 10 de novembro de 2026, com Godot 4.6.3 Standard, em Linux x64.
+
+A revisão 0.1.1 substitui a arte geométrica da primeira entrega por sprites
+ilustrados, materiais de terreno e novos quadros de personagens. Acrescenta
+zoom pela roda do mouse. A captura `overview.png` mostra a arte dentro do jogo.
 
 ## Verificações concluídas
 

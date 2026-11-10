@@ -25,6 +25,14 @@ func capture() -> void:
 	game.player.camera.reset_smoothing()
 	await create_timer(.7).timeout
 	await save_frame("res://docs/gameplay.png")
+	game.player.position = Vector2(580, 475)
+	game.player.zoom_target = 1.15
+	game.player.camera.zoom = Vector2(1.15, 1.15)
+	game.player.camera.reset_smoothing()
+	await create_timer(.4).timeout
+	await save_frame("res://docs/overview.png")
+	game.player.zoom_target = 1.8
+	game.player.camera.zoom = Vector2(1.8, 1.8)
 	game.player.position = Vector2(466, 590)
 	await create_timer(.15).timeout
 	game.start_dialogue("MARA", game.get_tree().get_nodes_in_group("interactables").filter(func(n: Node) -> bool: return n.get_script() == load("res://src/actors/survivor.gd"))[0].lines)

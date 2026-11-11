@@ -4,7 +4,7 @@ signal health_changed(value: int)
 const BALLISTICS = preload("res://src/systems/ballistics.gd")
 const SPEED: float = 145
 const MAX_HEALTH: int = 100
-const LEON: Texture2D = preload("res://art/survival/leon.png")
+const RIG = preload("res://src/systems/weapon_rig.gd")
 const ITEMS = preload("res://src/systems/items.gd")
 const SHADOW = preload("res://src/systems/shadows.gd")
 const WEAPONS := {"pistol": preload("res://resources/pistol.tres"), "shotgun": preload("res://resources/shotgun.tres"), "rifle": preload("res://resources/rifle.tres")}
@@ -32,6 +32,7 @@ var last_safe: Vector2
 var aim_target: Node2D
 var aim_bloom: float = 0
 var preview_hit: Dictionary = {}
+var aim_lateral: float = 0
 
 func _ready() -> void:
 	collision_layer = 2
@@ -51,11 +52,13 @@ func _ready() -> void:
 	camera.limit_bottom = int(game.world.MAP_SIZE.y)
 	add_child(camera)
 	last_safe = position
+	aim_lateral = RIG.lateral_for(weapon_id, facing)
 
 func equip(id: String) -> bool:
 	if id != "knife" and (not WEAPONS.has(id) or game.inventory.count(id) <= 0):
 		return false
 	weapon_id = id
+	aim_lateral = RIG.lateral_for(weapon_id, facing)
 	if id != "knife":
 		weapon = WEAPONS[id]
 	clear_aim_target()
@@ -93,10 +96,6 @@ func _physics_process(delta: float) -> void:
 	else:
 		animation = 0
 	preview_at(get_global_mouse_position())
-	if absf(aim.x) > absf(aim.y):
-		facing = 1 if aim.x > 0 else 3
-	else:
-		facing = 0 if aim.y > 0 else 2
 	if Input.is_action_pressed("shoot"):
 		fire_at(get_global_mouse_position())
 	if Input.is_action_pressed("knife"):
@@ -151,10 +150,10 @@ func fire_at(target: Vector2) -> Dictionary:
 		return knife_at(target)
 	if cooldown > 0 or knife_animation > 0 or health <= 0 or game.dialogue_active or get_tree().paused:
 		return {}
-	var origin := gun_origin()
-	var direction := origin.direction_to(target)
-	if direction == Vector2.ZERO:
+	if not orient_to(target):
 		return {}
+	var origin := gun_origin()
+	var direction := aim
 	if not game.inventory.remove(weapon.ammo_type):
 		cooldown = .3
 		game.notify("Sem munição. Use a faca [F / botão direito].")
@@ -165,6 +164,7 @@ func fire_at(target: Vector2) -> Dictionary:
 	shot_count += 1
 	var first: Dictionary = {}
 	var spread := current_spread()
+	var actual_muzzle := gun_muzzle()
 	for pellet in range(weapon.pellets):
 		var angle := 0.0 if spread == 0 else randf_range(-spread, spread)
 		var shot_direction := direction.rotated(angle)
@@ -179,8 +179,8 @@ func fire_at(target: Vector2) -> Dictionary:
 				result.collider.take_damage(weapon.damage, shot_direction, "bullet")
 			if first.is_empty():
 				first = result
-		var muzzle_distance := 29.0 if weapon_id == "pistol" else 42.0
-		var muzzle := origin + shot_direction * minf(muzzle_distance, origin.distance_to(end))
+		# All pellets share the actual barrel tip; a close obstruction still wins.
+		var muzzle := actual_muzzle if origin.distance_to(end) >= origin.distance_to(actual_muzzle) else end
 		game.effects.tracer(muzzle, end, not result.is_empty())
 	aim_bloom = minf(weapon.max_recoil, aim_bloom + weapon.recoil_per_shot)
 	if is_instance_valid(aim_target) and aim_target.health <= 0:
@@ -197,7 +197,7 @@ func knife_at(target: Vector2) -> Dictionary:
 	var direction := origin.direction_to(target)
 	if direction == Vector2.ZERO:
 		direction = aim
-	aim = direction
+	orient_to(target, "knife")
 	knife_cooldown = .48
 	knife_animation = .24
 	game.effects.slash(origin, direction)
@@ -232,35 +232,48 @@ func take_damage(amount: int) -> void:
 
 func _draw() -> void:
 	SHADOW.draw_contact(self, Vector2(7 + height * .12, -2), Vector2(37 + height * .15, 17), maxf(.3, 1 - height / 120))
-	var frame := posmod(int(animation), 4) if velocity.length_squared() > 1 else 0
 	var color := Color(1, .63, .52) if invulnerable > 0 and int(invulnerable * 15) % 2 == 0 else Color.WHITE
-	draw_texture_rect_region(LEON, Rect2(-23, -66 - height, 46, 69), Rect2(frame * 128, facing * 192, 128, 192), color)
+	RIG.draw(self, held_pose(), color)
+
+func body_frame() -> int:
+	return posmod(int(animation), 4) if velocity.length_squared() > 1 else 0
+
+func held_pose() -> Dictionary:
 	var id := "knife" if knife_animation > 0 else weapon_id
-	var icon: Texture2D = ITEMS.icon(id)
-	var shoulder := Vector2(0, -28 - height)
-	var angle := aim.angle()
+	var direction := aim
+	var lateral := aim_lateral
 	if knife_animation > 0:
-		angle += lerpf(-.9, 1.0, 1 - knife_animation / .24)
-	draw_set_transform(shoulder + aim * (6 - recoil), angle)
-	var gun_size := Vector2(29, 18) if id == "pistol" else Vector2(43, 20)
-	if id == "knife":
-		gun_size = Vector2(29, 14)
-	draw_texture_rect(icon, Rect2(Vector2(-3, -gun_size.y / 2), gun_size), false, color)
-	draw_set_transform(Vector2.ZERO)
+		direction = aim.rotated(lerpf(-.85, .85, 1 - knife_animation / .24))
+		lateral = RIG.lateral_for(id, facing)
+	return RIG.pose(id, direction, facing, body_frame(), velocity.length_squared() > 1, height, recoil if id != "knife" else 0.0, lateral)
 
 func gun_origin() -> Vector2:
-	return global_position + Vector2(0, -28 - height)
+	var center := RIG.pivot(body_frame(), velocity.length_squared() > 1, height)
+	return global_position + center + Vector2(-aim.y, aim.x) * aim_lateral
+
+func gun_muzzle() -> Vector2:
+	return global_position + Vector2(held_pose().muzzle)
+
+func orient_to(target: Vector2, held_id: String = "") -> bool:
+	if target.distance_squared_to(gun_origin()) < .0001:
+		return false
+	var id := weapon_id if held_id.is_empty() else held_id
+	var orientation := RIG.orient(id, target - global_position, body_frame(), velocity.length_squared() > 1, height)
+	if orientation.is_empty():
+		return false
+	aim = orientation.direction
+	facing = orientation.facing
+	aim_lateral = orientation.lateral
+	return true
 
 func current_spread() -> float:
 	return weapon.spread + aim_bloom
 
 func preview_at(target: Vector2) -> Dictionary:
 	clear_aim_target()
-	var direction := gun_origin().direction_to(target)
-	if direction.is_zero_approx():
+	if not orient_to(target, "knife" if knife_animation > 0 else ""):
 		return {}
-	aim = direction
-	if weapon_id == "knife" or health <= 0 or game.dialogue_active or get_tree().paused:
+	if weapon_id == "knife" or knife_animation > 0 or health <= 0 or game.dialogue_active or get_tree().paused:
 		return {}
 	preview_hit = BALLISTICS.trace(self, gun_origin(), aim, weapon.range_pixels)
 	if preview_hit.is_empty() or game.inventory.count(weapon.ammo_type) <= 0:

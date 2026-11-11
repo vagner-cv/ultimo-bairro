@@ -192,6 +192,7 @@ static func run(suite: SceneTree) -> bool:
 	actor.equip("shotgun")
 	ready_shot(actor)
 	var first_effect: int = game.effects.entries.size()
+	seed(15938)
 	actor.fire_at(actor.gun_origin() + Vector2.RIGHT * 300)
 	var directions: Array[float] = []
 	for i in range(first_effect, game.effects.entries.size()):

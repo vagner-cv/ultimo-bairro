@@ -54,3 +54,22 @@ seis projéteis com dispersão; o fuzil acumula abertura limitada em uma rajada,
 com recuperação ao parar. WeaponData guarda recuo por tiro, máximo e recuperação;
 o jogador guarda apenas o acúmulo atual. A visualização indica a direção central,
 sem anular dispersão ou garantir cada projétil. Não foi adicionado bônus de headshot.
+
+## Empunhadura — 0.4.2
+
+O personagem usa uma base com tronco/pernas sem braços em repouso, mais mangas
+e luvas pintadas. `weapon_rig.gd` resolve o cotovelo entre ombro e punho, ligando
+a palma ao ponto de empunhadura e a outra mão ao apoio da arma. A faca usa uma
+mão, com a outra em repouso. A caminhada mantém os frames de pernas e aplica
+um pequeno movimento vertical compartilhado pela montagem inteira.
+
+A configuração por arma contém textura própria de uso no mundo, escala,
+pegada, apoio, cano e alcance visual. A pistola usa duas mãos na empunhadura;
+fuzil e escopeta usam a segunda mão na parte frontal. Mirando ao norte, a
+montagem é desenhada antes do corpo para permitir a oclusão natural.
+
+O deslocamento lateral da empunhadura é compensado no ângulo, mantendo o cano
+alinhado ao cursor. O raio começa antes do cano para respeitar obstáculos
+próximos; todos os projéteis e o clarão partem visualmente do mesmo cano.
+O recuo desloca arma e mãos em conjunto e refaz o cotovelo. O pulo desloca
+ombros, braços e arma pela mesma altura. A animação da faca preserva o encaixe.

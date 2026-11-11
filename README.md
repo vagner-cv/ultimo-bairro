@@ -2,8 +2,8 @@
 
 Protótipo de sobrevivência para PC em **Godot 4.6.3**. Explore Vila Aurora,
 converse com Mara e sobreviva a ondas crescentes de infectados.
-A versão **0.4.1** mantém o cenário pintado detalhado e melhora a mira,
-os acertos no corpo e o feedback do combate.
+A versão **0.4.2** corrige a empunhadura: braços e mãos seguram as armas
+e acompanham a mira, o movimento, o recuo e o pulo.
 
 ![Partida com o cenário pintado integrado](docs/gameplay.png)
 
@@ -11,9 +11,9 @@ os acertos no corpo e o feedback do combate.
 
 Abra [Releases](https://github.com/vagner-cv/ultimo-bairro/releases) e baixe:
 
-- **Windows x64:** `UltimoBairro-0.4.1-Windows.zip`. Extraia tudo e abra
+- **Windows x64:** `UltimoBairro-0.4.2-Windows.zip`. Extraia tudo e abra
   `UltimoBairro.exe`.
-- **Linux x64:** `UltimoBairro-0.4.1-Linux.zip`. Extraia e execute
+- **Linux x64:** `UltimoBairro-0.4.2-Linux.zip`. Extraia e execute
   `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
 Os executáveis não precisam de Godot, Python ou instalação de assets.
@@ -52,6 +52,13 @@ A dispersão da arma continua valendo; o destaque não garante o acerto de cada 
 O fuzil abre a mira em rajadas e recupera precisão quando você para de disparar.
 
 ![Mira e contorno do alvo na linha de tiro](docs/aim.png)
+
+As armas têm pontos próprios de empunhadura e apoio da segunda mão. A pistola,
+a escopeta e o fuzil acompanham os braços; a faca permanece na mão durante o
+golpe. A arma fica atrás do corpo quando o personagem aponta para longe da câmera.
+Os tiros e o clarão saem da ponta do cano.
+
+![Escopeta apoiada nas mãos dentro do jogo](docs/weapon-grip.png)
 
 ## Escopo atual
 
@@ -103,7 +110,7 @@ godot --headless --path . --editor --import --quit
 godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd
 ```
 
-Há 121 verificações de gameplay, incluindo inventário, munições, loot, ondas,
+Há 146 verificações de gameplay, incluindo inventário, munições, loot, ondas,
 faca, salto, navegação, portas, diálogos, pausa e reinício. Para exportar, instale os modelos 4.6.3 em
 Editor → Gerenciar modelos de exportação e execute `python tools/build.py`.
 O comando valida, exporta Windows/Linux e monta ZIPs em `builds/` com os avisos

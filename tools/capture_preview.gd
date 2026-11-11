@@ -54,6 +54,19 @@ func capture() -> void:
 	game.player.cooldown = 0
 	game.player.fire_at(target.position + Vector2(0, -40))
 	await save_frame("res://docs/combat.png")
+	game.inventory.add("shotgun")
+	game.inventory.add("ammo_shell", 12)
+	game.player.equip("shotgun")
+	game.player.zoom_target = 2.4
+	game.player.camera.zoom = Vector2.ONE * 2.4
+	game.player.camera.reset_smoothing()
+	await create_timer(.2).timeout
+	Input.warp_mouse(target.get_global_transform_with_canvas() * Vector2(0, -35))
+	await create_timer(.1).timeout
+	await save_frame("res://docs/weapon-grip.png")
+	game.player.equip("pistol")
+	game.player.zoom_target = 1.8
+	game.player.camera.zoom = Vector2.ONE * 1.8
 	var locker = game.get_tree().get_nodes_in_group("containers").filter(func(n: Node) -> bool: return n.kind == "locker")[0]
 	game.player.position = locker.position + Vector2(0, 42)
 	game.player.camera.reset_smoothing()

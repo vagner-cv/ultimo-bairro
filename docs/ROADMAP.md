@@ -18,6 +18,12 @@ Mira livre com acerto no corpo visível, contorno e mira verdes para alvo válid
 bloqueio coerente por paredes/portas, origem do tiro alinhada à arma, recuo
 progressivo do fuzil e feedback de dispersão. 121 testes de gameplay.
 
+## Entregue em 0.4.2
+
+Braços e mãos articulados, empunhadura por arma, apoio nas armas longas,
+oclusão pelo corpo, recuo/movimento/pulo compartilhados e saída do tiro pelo
+cano. Revisão visual de 32 poses e 146 testes de gameplay.
+
 ## Próximas possibilidades
 
 Salvamento de partida, interiores com mobília específica por prédio, mais

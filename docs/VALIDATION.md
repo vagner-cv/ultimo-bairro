@@ -1,6 +1,6 @@
-# Validação da versão 0.4.1
+# Validação da versão 0.4.2
 
-121/121 verificações em `tests/run_tests.gd`: movimentação normalizada, paredes,
+146/146 verificações em `tests/run_tests.gd`: movimentação normalizada, paredes,
 portas e navegação, tiro/oclusão, perseguição/ataque, diálogo, pausa, morte,
 reinício, ondas automáticas, mapa ampliado, inventário sem limite, transações
 atômicas, cura, munições independentes, armas não possuídas, recipientes
@@ -30,3 +30,13 @@ intermediária não produza um resultado parcial aparentemente aprovado.
 
 `docs/aim.png` registra a mira verde e o contorno no renderer do jogo. Os tiros
 agora partem do ponto visual da arma, e os efeitos de sangue acompanham o impacto.
+
+`tests/grip_checks.gd` cobre as quatro armas em 24 ângulos, quatro frames de
+caminhada, recuo e pulo: pegada/apoio conectados, juntas válidas, alcance dos
+braços limitado, cano alinhado à mira e movimento compartilhado no recuo.
+Também verifica os pontos de saída reais dos disparos e o encaixe da faca
+durante o golpe. A dispersão da escopeta usa semente fixa no teste de mira.
+
+`tools/capture_weapon_poses.gd` renderiza uma grade das quatro armas em oito
+direções usando a mesma montagem do jogador. `docs/weapon-grip.png` mostra a
+escopeta com apoio das duas mãos dentro do jogo, com a câmera normal ampliada.

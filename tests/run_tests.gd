@@ -171,6 +171,8 @@ func run() -> void:
 	await survival_checks()
 	var aim_completed = await preload("res://tests/aim_checks.gd").run(self)
 	check(aim_completed == true, "Aim scenarios complete without aborting")
+	var grip_completed = await preload("res://tests/grip_checks.gd").run(self)
+	check(grip_completed == true, "Grip scenarios complete without aborting")
 
 	print("\nRESULT: %d/%d passed" % [checks - failures, checks])
 	game.queue_free()

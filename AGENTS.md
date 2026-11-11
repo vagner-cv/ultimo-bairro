@@ -28,3 +28,9 @@
   separadas dos pés e destaque do alvo usando a mesma verificação do disparo.
   Respeite alcance, paredes e portas; não exija cursor sobre o alvo nem aplique
   correção automática de direção. Recuo e dispersão são atributos WeaponData.
+
+- Empunhadura 0.4.2: use `weapon_rig.gd` e a arte de `art/rig/`; preserve
+  as ligações ombro/cotovelo/punho e os pontos de pegada/apoio/cano por arma.
+  Ícones de inventário não devem ser usados como armas orbitando o personagem.
+  Recuo, caminhada e pulo movem a montagem inteira; mantenha a saída do tiro
+  na mesma linha do cano e a oclusão pelo corpo quando o personagem mira ao norte.

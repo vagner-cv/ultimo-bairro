@@ -7,7 +7,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "builds"
 LOGS = BUILD / "logs"
-VERSION = "0.4.1"
+VERSION = "0.4.2"
 
 
 def run(name, arguments):
@@ -41,7 +41,7 @@ def main():
         for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt"]:
             shutil.copy(ROOT / "art" / notice, folder / notice)
         (folder / "LEIA-ME.txt").write_text(
-            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.1\n\n"
+            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.2\n\n"
             "Extraia todos os arquivos antes de jogar.\n"
             f"Abra {executable}. Não precisa instalar Godot.\n\n"
             "WASD ou setas: caminhar\nMouse: mirar\nBotão esquerdo: atirar (segure para repetir)\n"

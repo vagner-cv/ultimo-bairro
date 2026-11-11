@@ -1,4 +1,4 @@
-# Arte ativa — versão 0.4.0
+# Arte ativa — versão 0.4.2
 
 A direção visual atual é arte pintada detalhada, com materiais naturais,
 paleta desgastada e acabamento coerente entre cenário, personagens e itens.
@@ -37,3 +37,17 @@ A CraftPix foi usada nas versões anteriores. `tools/prepare_assets.py` e
 `CRAFTPIX-NOTICE.txt` ficam como registro histórico; `art/vendor/` é ignorado
 no Git e excluído das exportações. Não é necessário baixar esse kit agora.
 Fontes DejaVu e Godot mantêm seus avisos de licença nos pacotes.
+
+## Empunhadura e braços
+
+`art/rig/leon_body.png` é uma edição do sprite próprio do Leon, com cabeça,
+tronco e pernas preservados e sem os braços em repouso. As mangas e luvas
+separadas foram geradas no mesmo acabamento de couro e forro de lã. O preparo
+técnico separa as células do atlas e mantém o alinhamento dos 16 frames.
+
+As armas de mão foram recortadas dos ícones próprios, removendo as margens
+transparentes para preparar sprites de uso no mundo. `weapon_rig.gd` define
+pegada, apoio e ponta do cano em coordenadas dessas texturas. Os ícones de
+inventário originais ficam preservados. A montagem desenha mangas, luvas e arma
+como texturas pintadas, ligadas por juntas de ombro/cotovelo/punho; não desenha
+braços com primitivas. A filtragem usa mipmaps para reduzir cintilação.

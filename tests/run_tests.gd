@@ -169,6 +169,8 @@ func run() -> void:
 	check(game.wave == 2 and game.wave_total == 26 and game.remaining == 26, "Second wave automatically contains eight more zombies")
 	check(get_nodes_in_group("zombies").size() > 0, "Automatic wave respawn creates actual enemies")
 	await survival_checks()
+	var aim_completed = await preload("res://tests/aim_checks.gd").run(self)
+	check(aim_completed == true, "Aim scenarios complete without aborting")
 
 	print("\nRESULT: %d/%d passed" % [checks - failures, checks])
 	game.queue_free()

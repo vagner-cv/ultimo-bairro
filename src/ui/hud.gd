@@ -189,7 +189,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.4.0  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.4.1  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:
@@ -258,14 +258,33 @@ func _draw_game(w: float, h: float) -> void:
 		var alpha: float = game.player.invulnerable * .11
 		draw_rect(Rect2(Vector2.ZERO, size), Color(.7, .17, .11, alpha))
 	if not game.dialogue_active and not game.inventory_open:
-		var at := get_local_mouse_position()
-		var col := ACCENT if hit_timer > 0 else PAPER
-		for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
-			draw_line(at + dir * 6, at + dir * 12, Color(.02, .06, .04, .9), 4)
-			draw_line(at + dir * 6, at + dir * 11, col, 2)
-		draw_rect(Rect2(at - Vector2.ONE, Vector2(2, 2)), col)
-		if hit_timer > 0:
-			draw_circle(at, 17, Color(ACCENT, .6), false, 1)
+		_draw_reticle()
+
+func _draw_reticle() -> void:
+	var actor = game.player
+	var at := get_local_mouse_position()
+	var has_target: bool = is_instance_valid(actor.aim_target) and actor.aim_target.health > 0
+	var empty: bool = actor.weapon_id != "knife" and game.inventory.count(actor.weapon.ammo_type) == 0
+	var target_color := Color("9fe3ab")
+	var col := target_color if has_target else PAPER
+	if empty:
+		col = MUTED
+	if hit_timer > 0:
+		col = ACCENT
+	var radius := 6.0 if actor.weapon_id == "knife" else 6 + minf(.13, actor.current_spread()) * 150
+	for dir in [Vector2.UP, Vector2.DOWN, Vector2.LEFT, Vector2.RIGHT]:
+		draw_line(at + dir * radius, at + dir * (radius + 6), Color(.015, .025, .02, .95), 4, true)
+		draw_line(at + dir * radius, at + dir * (radius + 5), col, 2, true)
+	draw_circle(at, 1.3, col)
+	if actor.weapon_id == "shotgun":
+		draw_arc(at, radius + 3, 0, TAU, 40, Color(col, .3), 1, true)
+	if has_target:
+		text_at("ALVO", at + Vector2(radius + 12, 4), 9, target_color, true)
+	elif empty:
+		text_at("SEM MUNIÇÃO", at + Vector2(radius + 12, 4), 9, MUTED, true)
+	if hit_timer > 0:
+		for diagonal in [Vector2(-1, -1), Vector2(1, -1), Vector2(-1, 1), Vector2(1, 1)]:
+			draw_line(at + diagonal * 4, at + diagonal * 8, ACCENT, 1.5, true)
 
 func _draw_minimap(x: float, y: float) -> void:
 	panel(Rect2(x, y, 186, 176))

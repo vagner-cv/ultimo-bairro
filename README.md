@@ -2,8 +2,8 @@
 
 Protótipo de sobrevivência para PC em **Godot 4.6.3**. Explore Vila Aurora,
 converse com Mara e sobreviva a ondas crescentes de infectados.
-A versão **0.4.0** refaz o cenário em arte pintada detalhada, no mesmo estilo
-do personagem e dos itens.
+A versão **0.4.1** mantém o cenário pintado detalhado e melhora a mira,
+os acertos no corpo e o feedback do combate.
 
 ![Partida com o cenário pintado integrado](docs/gameplay.png)
 
@@ -11,9 +11,9 @@ do personagem e dos itens.
 
 Abra [Releases](https://github.com/vagner-cv/ultimo-bairro/releases) e baixe:
 
-- **Windows x64:** `UltimoBairro-0.4.0-Windows.zip`. Extraia tudo e abra
+- **Windows x64:** `UltimoBairro-0.4.1-Windows.zip`. Extraia tudo e abra
   `UltimoBairro.exe`.
-- **Linux x64:** `UltimoBairro-0.4.0-Linux.zip`. Extraia e execute
+- **Linux x64:** `UltimoBairro-0.4.1-Linux.zip`. Extraia e execute
   `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
 Os executáveis não precisam de Godot, Python ou instalação de assets.
@@ -43,6 +43,15 @@ Esta entrega é para PC; ainda não há versão publicada para navegador.
 Você começa na casa 07. Use **E** perto da porta para sair; Mara está no jardim
 à direita. Tiros atraem infectados. Paredes e portas fechadas bloqueiam o tiro
 e o caminho. A partida pode ser reiniciada pelo menu de pausa ou após morrer.
+
+A mira é livre: o cursor aponta a arma e o tiro continua naquela direção,
+atingindo o primeiro corpo ou obstáculo. O cursor pode estar antes ou depois
+do inimigo. Mira e contorno verdes identificam um zumbi visível na trajetória,
+dentro do alcance e com munição disponível. Paredes e portas fechadas bloqueiam.
+A dispersão da arma continua valendo; o destaque não garante o acerto de cada projétil.
+O fuzil abre a mira em rajadas e recupera precisão quando você para de disparar.
+
+![Mira e contorno do alvo na linha de tiro](docs/aim.png)
 
 ## Escopo atual
 
@@ -94,7 +103,7 @@ godot --headless --path . --editor --import --quit
 godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd
 ```
 
-Há 80 verificações de gameplay, incluindo inventário, munições, loot, ondas,
+Há 121 verificações de gameplay, incluindo inventário, munições, loot, ondas,
 faca, salto, navegação, portas, diálogos, pausa e reinício. Para exportar, instale os modelos 4.6.3 em
 Editor → Gerenciar modelos de exportação e execute `python tools/build.py`.
 O comando valida, exporta Windows/Linux e monta ZIPs em `builds/` com os avisos

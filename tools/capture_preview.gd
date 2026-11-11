@@ -47,8 +47,12 @@ func capture() -> void:
 	var target = get_nodes_in_group("zombies")[0]
 	target.position = Vector2(950, 630)
 	await create_timer(.05).timeout
+	var cursor: Vector2 = target.get_global_transform_with_canvas() * Vector2(0, -40)
+	Input.warp_mouse(cursor)
+	await create_timer(.15).timeout
+	await save_frame("res://docs/aim.png")
 	game.player.cooldown = 0
-	game.player.fire_at(target.position + Vector2(0, -14))
+	game.player.fire_at(target.position + Vector2(0, -40))
 	await save_frame("res://docs/combat.png")
 	var locker = game.get_tree().get_nodes_in_group("containers").filter(func(n: Node) -> bool: return n.kind == "locker")[0]
 	game.player.position = locker.position + Vector2(0, 42)

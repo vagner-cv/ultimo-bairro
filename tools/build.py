@@ -7,7 +7,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "builds"
 LOGS = BUILD / "logs"
-VERSION = "0.4.0"
+VERSION = "0.4.1"
 
 
 def run(name, arguments):
@@ -41,7 +41,7 @@ def main():
         for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt"]:
             shutil.copy(ROOT / "art" / notice, folder / notice)
         (folder / "LEIA-ME.txt").write_text(
-            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.0\n\n"
+            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.1\n\n"
             "Extraia todos os arquivos antes de jogar.\n"
             f"Abra {executable}. Não precisa instalar Godot.\n\n"
             "WASD ou setas: caminhar\nMouse: mirar\nBotão esquerdo: atirar (segure para repetir)\n"
@@ -52,6 +52,8 @@ def main():
             "Mara está no jardim à direita. A primeira onda tem 18 infectados.\n"
             "Cada onda seguinte traz mais 8 infectados, após 12 segundos de intervalo.\n"
             "Munição finita e própria para cada arma. A faca não usa munição.\n"
+            "Mira livre: a bala segue a direção do mouse. Verde indica alvo na trajetória.\n"
+            "O tiro acerta o corpo visível e respeita paredes, portas e dispersão.\n"
             "Abra armários, gavetas e lixeiras com E. Corte caixas com a faca.\n"
             "Organize os itens no inventário; sem limite de carregamento.\n"
             "O conteúdo dos recipientes persiste durante a partida. Não há salvamento.\n\n"

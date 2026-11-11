@@ -21,6 +21,10 @@ var tint: Color = Color.WHITE
 var last_known: Vector2
 var memory: float = 0.0
 var idle_animation: float = 0.0
+var body_hitbox: Area2D
+var body_sprite: Sprite2D
+var outline: ShaderMaterial
+var targeted: bool = false
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -33,6 +37,16 @@ func _ready() -> void:
 	collision.shape = shape
 	collision.position.y = -8
 	add_child(collision)
+	body_hitbox = preload("res://src/systems/ballistics.gd").attach_body(self)
+	body_sprite = Sprite2D.new()
+	body_sprite.texture = KIT.ZOMBIE_IDLE
+	body_sprite.hframes = 4
+	body_sprite.scale = Vector2(46.0 / 128, 69.0 / 192)
+	body_sprite.position = Vector2(0, -31.5)
+	outline = ShaderMaterial.new()
+	outline.shader = preload("res://shaders/target_outline.gdshader")
+	body_sprite.material = outline
+	add_child(body_sprite)
 	wander_timer = randf_range(.5, 4)
 	think_timer = randf_range(0, .5)
 	speed = randf_range(37, 49) + minf(18, (game.wave - 1) * 1.5)
@@ -101,19 +115,21 @@ func hear(at: Vector2, radius: float) -> void:
 		memory = 8
 		think_timer = 0
 
-func take_damage(amount: int, direction: Vector2 = Vector2.ZERO, _damage_kind: String = "bullet") -> void:
+func take_damage(amount: int, direction: Vector2 = Vector2.ZERO, _damage_kind: String = "bullet", impact: Vector2 = Vector2.INF) -> void:
 	if state == State.DEAD:
 		return
 	health = maxi(0, health - amount)
 	flash = .12
 	knockback = direction * 95
 	hear(game.player.global_position, 9999)
-	game.effects.blood(global_position + Vector2(0, -13), direction)
+	game.effects.blood(global_position + Vector2(0, -26) if impact == Vector2.INF else impact, direction)
 	game.audio.play("impact", -5)
 	if health == 0:
 		state = State.DEAD
 		collision_layer = 0
 		collision_mask = 0
+		body_hitbox.collision_layer = 0
+		set_targeted(false)
 		game.effects.corpse(global_position, Color("647767") * tint)
 		game.zombie_killed(global_position)
 		queue_free()
@@ -130,7 +146,20 @@ func _draw() -> void:
 	var left := facing == 3
 	if state == State.CHASE and is_instance_valid(game.player):
 		left = game.player.global_position.x < global_position.x
-	KIT.actor(self, texture, frame, left, color)
+	body_sprite.texture = texture
+	body_sprite.frame = posmod(frame, 4)
+	body_sprite.flip_h = left
+	body_sprite.modulate = color
+	outline.set_shader_parameter("selected", targeted and not get_tree().paused and not game.dialogue_active)
+
 	if health < max_health:
 		draw_rect(Rect2(-13, -73, 26, 3), Color("253a33"))
 		draw_rect(Rect2(-13, -73, 26.0 * health / max_health, 3), Color("d89b6a"))
+
+func set_targeted(value: bool) -> void:
+	if targeted == value:
+		return
+	targeted = value
+	if outline != null:
+		outline.set_shader_parameter("selected", value)
+	queue_redraw()

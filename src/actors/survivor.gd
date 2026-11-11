@@ -20,6 +20,7 @@ func _ready() -> void:
 	collision.shape = shape
 	collision.position.y = -7
 	add_child(collision)
+	preload("res://src/systems/ballistics.gd").attach_body(self)
 
 func _draw() -> void:
 	draw_circle(Vector2(0, -3), 10, Color(0, 0, 0, .2))

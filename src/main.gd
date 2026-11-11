@@ -135,6 +135,7 @@ func restart() -> void:
 	begin()
 
 func toggle_pause() -> void:
+	player.clear_aim_target()
 	if inventory_open:
 		close_inventory()
 		return
@@ -209,6 +210,7 @@ func _process(delta: float) -> void:
 	player.camera.offset = Vector2(randf_range(-shake, shake), randf_range(-shake, shake))
 
 func start_dialogue(speaker: String, lines: Array[String]) -> void:
+	player.clear_aim_target()
 	dialogue_active = true
 	dialogue_name = speaker
 	dialogue_lines = lines
@@ -242,6 +244,7 @@ func zombie_killed(at: Vector2 = Vector2.ZERO) -> void:
 		notify("Onda %d concluída. Próxima em 12 segundos." % wave)
 
 func game_over() -> void:
+	player.clear_aim_target()
 	end_dialogue()
 	get_tree().paused = true
 	hud.show_screen("dead")
@@ -315,6 +318,7 @@ func can_interact(item: Node2D) -> bool:
 func open_inventory(container: Node2D = null) -> void:
 	if not started or player.health <= 0 or dialogue_active or inventory_open:
 		return
+	player.clear_aim_target()
 	inventory_open = true
 	get_tree().paused = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -347,6 +351,7 @@ func use_item(id: String) -> bool:
 func toggle_map() -> void:
 	if not started or player.health <= 0 or inventory_open or dialogue_active or hud.screen not in ["none", "map"]:
 		return
+	player.clear_aim_target()
 	var opened: bool = hud.screen != "map"
 	get_tree().paused = opened
 	hud.show_screen("map" if opened else "none")

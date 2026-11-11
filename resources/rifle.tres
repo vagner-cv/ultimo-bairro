@@ -13,3 +13,6 @@ ammo_type = "ammo_rifle"
 pellets = 1
 spread = 0.018
 icon_id = "rifle"
+recoil_per_shot = 0.014
+max_recoil = 0.055
+recoil_recovery = 0.06

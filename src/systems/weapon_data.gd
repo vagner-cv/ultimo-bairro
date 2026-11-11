@@ -11,3 +11,7 @@ extends Resource
 @export var pellets: int = 1
 @export var spread: float = 0
 @export var icon_id: String = "pistol"
+
+@export var recoil_per_shot: float = .003
+@export var max_recoil: float = .008
+@export var recoil_recovery: float = .08

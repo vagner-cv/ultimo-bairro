@@ -23,3 +23,8 @@
 - Escopo visual 0.4 autorizado: substituir o cenário CraftPix por arte pintada
   detalhada, coerente com Leon e os itens. Use sprites próprios e preserve os
   avisos de licença dos assets ainda usados; não extraia arquivos de outros jogos.
+
+- Mira 0.4.1 autorizada: tiro livre por direção, áreas de acerto do corpo
+  separadas dos pés e destaque do alvo usando a mesma verificação do disparo.
+  Respeite alcance, paredes e portas; não exija cursor sobre o alvo nem aplique
+  correção automática de direção. Recuo e dispersão são atributos WeaponData.

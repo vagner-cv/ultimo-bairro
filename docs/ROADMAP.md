@@ -12,6 +12,12 @@ Cenário pintado detalhado, interiores mobiliados, fachadas por categoria,
 vegetação/objetos urbanos, iluminação de postes, Mara e zumbis coerentes com
 o personagem e itens. Projeto abre sem baixar o kit da versão anterior.
 
+## Entregue em 0.4.1
+
+Mira livre com acerto no corpo visível, contorno e mira verdes para alvo válido,
+bloqueio coerente por paredes/portas, origem do tiro alinhada à arma, recuo
+progressivo do fuzil e feedback de dispersão. 121 testes de gameplay.
+
 ## Próximas possibilidades
 
 Salvamento de partida, interiores com mobília específica por prédio, mais

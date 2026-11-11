@@ -13,3 +13,6 @@ ammo_type = "ammo_shell"
 pellets = 6
 spread = 0.13
 icon_id = "shotgun"
+recoil_per_shot = 0.008
+max_recoil = 0.02
+recoil_recovery = 0.08

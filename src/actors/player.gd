@@ -1,6 +1,7 @@
 extends CharacterBody2D
 
 signal health_changed(value: int)
+const BALLISTICS = preload("res://src/systems/ballistics.gd")
 const SPEED: float = 145
 const MAX_HEALTH: int = 100
 const LEON: Texture2D = preload("res://art/survival/leon.png")
@@ -28,6 +29,9 @@ var vertical_speed: float = 0
 var knife_animation: float = 0
 var jump_count: int = 0
 var last_safe: Vector2
+var aim_target: Node2D
+var aim_bloom: float = 0
+var preview_hit: Dictionary = {}
 
 func _ready() -> void:
 	collision_layer = 2
@@ -54,6 +58,8 @@ func equip(id: String) -> bool:
 	weapon_id = id
 	if id != "knife":
 		weapon = WEAPONS[id]
+	clear_aim_target()
+	aim_bloom = minf(aim_bloom, weapon.max_recoil)
 	cooldown = maxf(cooldown, .16)
 	game.notify(ITEMS.label(id) + " equipada")
 	return true
@@ -66,8 +72,10 @@ func _physics_process(delta: float) -> void:
 	knife_animation = maxf(0, knife_animation - delta)
 	invulnerable = maxf(0, invulnerable - delta)
 	recoil = move_toward(recoil, 0, delta * 18)
+	aim_bloom = move_toward(aim_bloom, 0, delta * weapon.recoil_recovery)
 	if health <= 0 or game.dialogue_active:
 		velocity = Vector2.ZERO
+		clear_aim_target()
 		queue_redraw()
 		return
 	_update_jump(delta)
@@ -84,9 +92,7 @@ func _physics_process(delta: float) -> void:
 			footstep_timer = .32
 	else:
 		animation = 0
-	var to_mouse := get_global_mouse_position() - (global_position + Vector2(0, -22))
-	if to_mouse.length_squared() > 1:
-		aim = to_mouse.normalized()
+	preview_at(get_global_mouse_position())
 	if absf(aim.x) > absf(aim.y):
 		facing = 1 if aim.x > 0 else 3
 	else:
@@ -145,7 +151,7 @@ func fire_at(target: Vector2) -> Dictionary:
 		return knife_at(target)
 	if cooldown > 0 or knife_animation > 0 or health <= 0 or game.dialogue_active or get_tree().paused:
 		return {}
-	var origin := global_position + Vector2(0, -14)
+	var origin := gun_origin()
 	var direction := origin.direction_to(target)
 	if direction == Vector2.ZERO:
 		return {}
@@ -158,21 +164,27 @@ func fire_at(target: Vector2) -> Dictionary:
 	recoil = 3.5 if weapon_id == "shotgun" else 2
 	shot_count += 1
 	var first: Dictionary = {}
+	var spread := current_spread()
 	for pellet in range(weapon.pellets):
-		var angle := 0.0 if weapon.spread == 0 else randf_range(-weapon.spread, weapon.spread)
+		var angle := 0.0 if spread == 0 else randf_range(-spread, spread)
 		var shot_direction := direction.rotated(angle)
 		var end := origin + shot_direction * weapon.range_pixels
-		var query := PhysicsRayQueryParameters2D.create(origin, end, 1 | 4 | 8 | 16)
-		query.exclude = [get_rid()]
-		var result := get_world_2d().direct_space_state.intersect_ray(query)
+		var result := BALLISTICS.trace(self, origin, shot_direction, weapon.range_pixels)
 		if not result.is_empty():
 			end = result.position
-			if result.collider.has_method("take_damage"):
-				result.collider.take_damage(weapon.damage, shot_direction, "bullet")
+			if result.collider.is_in_group("zombies") and result.collider.health > 0:
+				result.collider.take_damage(weapon.damage, shot_direction, "bullet", end)
 				game.hud.mark_hit()
+			elif result.collider.has_method("take_damage"):
+				result.collider.take_damage(weapon.damage, shot_direction, "bullet")
 			if first.is_empty():
 				first = result
-		game.effects.tracer(origin + shot_direction * 10, end, not result.is_empty())
+		var muzzle_distance := 29.0 if weapon_id == "pistol" else 42.0
+		var muzzle := origin + shot_direction * minf(muzzle_distance, origin.distance_to(end))
+		game.effects.tracer(muzzle, end, not result.is_empty())
+	aim_bloom = minf(weapon.max_recoil, aim_bloom + weapon.recoil_per_shot)
+	if is_instance_valid(aim_target) and aim_target.health <= 0:
+		clear_aim_target()
 	game.audio.play("shot", -4 if weapon_id == "shotgun" else -8)
 	game.make_noise(global_position, weapon.noise_radius)
 	game.shake = 1.5 if weapon_id == "shotgun" else .75
@@ -235,3 +247,38 @@ func _draw() -> void:
 		gun_size = Vector2(29, 14)
 	draw_texture_rect(icon, Rect2(Vector2(-3, -gun_size.y / 2), gun_size), false, color)
 	draw_set_transform(Vector2.ZERO)
+
+func gun_origin() -> Vector2:
+	return global_position + Vector2(0, -28 - height)
+
+func current_spread() -> float:
+	return weapon.spread + aim_bloom
+
+func preview_at(target: Vector2) -> Dictionary:
+	clear_aim_target()
+	var direction := gun_origin().direction_to(target)
+	if direction.is_zero_approx():
+		return {}
+	aim = direction
+	if weapon_id == "knife" or health <= 0 or game.dialogue_active or get_tree().paused:
+		return {}
+	preview_hit = BALLISTICS.trace(self, gun_origin(), aim, weapon.range_pixels)
+	if preview_hit.is_empty() or game.inventory.count(weapon.ammo_type) <= 0:
+		return preview_hit
+	var candidate: Node2D = preview_hit.collider
+	if candidate.is_in_group("zombies") and candidate.health > 0 and _target_visible(candidate):
+		aim_target = candidate
+		aim_target.set_targeted(true)
+	return preview_hit
+
+func _target_visible(candidate: Node2D) -> bool:
+	for roof in game.world.roofs.get_children():
+		if roof.fade > .5 and Rect2(roof.global_position, roof.size).has_point(candidate.global_position):
+			return false
+	return true
+
+func clear_aim_target() -> void:
+	if is_instance_valid(aim_target):
+		aim_target.set_targeted(false)
+	aim_target = null
+	preview_hit = {}

@@ -81,6 +81,12 @@ func capture() -> void:
 	game.player.camera.reset_smoothing()
 	await create_timer(.5).timeout
 	await save_frame("res://docs/industry.png")
+	game.player.position = Vector2(4160, 2160)
+	game.player.zoom_target = 1.2
+	game.player.camera.zoom = Vector2.ONE * 1.2
+	game.player.camera.reset_smoothing()
+	await create_timer(.5).timeout
+	await save_frame("res://docs/vegetation.png")
 	game.toggle_pause()
 	await save_frame("res://docs/pause.png")
 	game.queue_free()

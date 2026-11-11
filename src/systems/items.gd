@@ -18,5 +18,5 @@ static func label(id: String) -> String:
 
 static func icon(id: String) -> Texture2D:
 	if not textures.has(id):
-		textures[id] = load("res://art/survival/%s.png" % DATA.get(id, {"icon": "loot"}).icon)
+		textures[id] = load("res://art/pixel/%s.png" % DATA.get(id, {"icon": "loot"}).icon)
 	return textures[id]

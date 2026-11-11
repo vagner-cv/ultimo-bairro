@@ -4,7 +4,7 @@ signal health_changed(value: int)
 const BALLISTICS = preload("res://src/systems/ballistics.gd")
 const SPEED: float = 145
 const MAX_HEALTH: int = 100
-const RIG = preload("res://src/systems/weapon_rig.gd")
+const ART = preload("res://src/systems/pixel_actor.gd")
 const ITEMS = preload("res://src/systems/items.gd")
 const SHADOW = preload("res://src/systems/shadows.gd")
 const WEAPONS := {"pistol": preload("res://resources/pistol.tres"), "shotgun": preload("res://resources/shotgun.tres"), "rifle": preload("res://resources/rifle.tres")}
@@ -22,7 +22,7 @@ var footstep_timer: float = 0
 var shot_count: int = 0
 var camera: Camera2D
 var recoil: float = 0
-var zoom_target: float = 1.75
+var zoom_target: float = 2.0
 var idle_animation: float = 0
 var height: float = 0
 var vertical_speed: float = 0
@@ -32,7 +32,6 @@ var last_safe: Vector2
 var aim_target: Node2D
 var aim_bloom: float = 0
 var preview_hit: Dictionary = {}
-var aim_lateral: float = 0
 
 func _ready() -> void:
 	collision_layer = 2
@@ -52,13 +51,11 @@ func _ready() -> void:
 	camera.limit_bottom = int(game.world.MAP_SIZE.y)
 	add_child(camera)
 	last_safe = position
-	aim_lateral = RIG.lateral_for(weapon_id, facing)
 
 func equip(id: String) -> bool:
 	if id != "knife" and (not WEAPONS.has(id) or game.inventory.count(id) <= 0):
 		return false
 	weapon_id = id
-	aim_lateral = RIG.lateral_for(weapon_id, facing)
 	if id != "knife":
 		weapon = WEAPONS[id]
 	clear_aim_target()
@@ -152,15 +149,16 @@ func fire_at(target: Vector2) -> Dictionary:
 		return {}
 	if not orient_to(target):
 		return {}
-	var origin := gun_origin()
-	var direction := aim
 	if not game.inventory.remove(weapon.ammo_type):
 		cooldown = .3
 		game.notify("Sem munição. Use a faca [F / botão direito].")
 		return {}
-	aim = direction
 	cooldown = weapon.cooldown
 	recoil = 3.5 if weapon_id == "shotgun" else 2
+	# Resolve the firing frame before tracing so flash and bullet share its tip.
+	orient_to(target)
+	var origin := gun_origin()
+	var direction := aim
 	shot_count += 1
 	var first: Dictionary = {}
 	var spread := current_spread()
@@ -233,23 +231,17 @@ func take_damage(amount: int) -> void:
 func _draw() -> void:
 	SHADOW.draw_contact(self, Vector2(7 + height * .12, -2), Vector2(37 + height * .15, 17), maxf(.3, 1 - height / 120))
 	var color := Color(1, .63, .52) if invulnerable > 0 and int(invulnerable * 15) % 2 == 0 else Color.WHITE
-	RIG.draw(self, held_pose(), color)
+	ART.draw(self, held_pose(), color)
 
 func body_frame() -> int:
-	return posmod(int(animation), 4) if velocity.length_squared() > 1 else 0
+	return ART.frame_for(velocity.length_squared() > 1, animation, recoil > .25, knife_animation > 0 and knife_animation < .19)
 
 func held_pose() -> Dictionary:
 	var id := "knife" if knife_animation > 0 else weapon_id
-	var direction := aim
-	var lateral := aim_lateral
-	if knife_animation > 0:
-		direction = aim.rotated(lerpf(-.85, .85, 1 - knife_animation / .24))
-		lateral = RIG.lateral_for(id, facing)
-	return RIG.pose(id, direction, facing, body_frame(), velocity.length_squared() > 1, height, recoil if id != "knife" else 0.0, lateral)
+	return ART.pose(id, facing, body_frame(), height)
 
 func gun_origin() -> Vector2:
-	var center := RIG.pivot(body_frame(), velocity.length_squared() > 1, height)
-	return global_position + center + Vector2(-aim.y, aim.x) * aim_lateral
+	return gun_muzzle()
 
 func gun_muzzle() -> Vector2:
 	return global_position + Vector2(held_pose().muzzle)
@@ -258,12 +250,10 @@ func orient_to(target: Vector2, held_id: String = "") -> bool:
 	if target.distance_squared_to(gun_origin()) < .0001:
 		return false
 	var id := weapon_id if held_id.is_empty() else held_id
-	var orientation := RIG.orient(id, target - global_position, body_frame(), velocity.length_squared() > 1, height)
-	if orientation.is_empty():
-		return false
-	aim = orientation.direction
-	facing = orientation.facing
-	aim_lateral = orientation.lateral
+	var center := global_position + Vector2(0, -42 - height)
+	facing = ART.facing_for(target - center)
+	var state := ART.pose(id, facing, body_frame(), height)
+	aim = (global_position + Vector2(state.muzzle)).direction_to(target)
 	return true
 
 func current_spread() -> float:

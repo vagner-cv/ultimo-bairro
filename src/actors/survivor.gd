@@ -10,7 +10,7 @@ var lines: Array[String] = [
 ]
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	collision_layer = 8
 	collision_mask = 0
 	add_to_group("interactables")

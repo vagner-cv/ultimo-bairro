@@ -13,7 +13,7 @@ func navigation_rect() -> Rect2:
 	return Rect2(global_position - Vector2(size.x / 2, size.y), size)
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if kind == "lamp":
 		var glow := PointLight2D.new()
 		glow.texture = SHADOW.glow_texture()
@@ -28,8 +28,7 @@ func _draw() -> void:
 	if kind == "wall":
 		_draw_wall()
 		return
-	var art_kind := "pine" if kind == "tree" and variant == 1 else kind
-	var texture: Texture2D = ART.PROPS.get(art_kind, ART.PROPS.crate)
+	var texture: Texture2D = ART.TREES[posmod(variant, ART.TREES.size())] if kind == "tree" else ART.PROPS.get(kind, ART.PROPS.crate)
 	var dimensions := visual_size if visual_size != Vector2.ZERO else _dimensions(texture)
 	SHADOW.draw_contact(self, Vector2(10, -2), Vector2(maxf(26, dimensions.x * .85), 18))
 	if kind in ["tree", "pine"]:
@@ -48,6 +47,9 @@ func _draw() -> void:
 		draw_texture_rect(texture, Rect2(Vector2(-dimensions.x / 2, -dimensions.y), dimensions), false)
 
 func _dimensions(texture: Texture2D) -> Vector2:
+	if kind == "tree":
+		var tree_height: float = [180, 206, 192, 214, 180, 184, 192, 142][posmod(variant, 8)]
+		return texture.get_size() * minf(172.0 / texture.get_width(), tree_height / texture.get_height())
 	var limits := {
 		"tree": Vector2(145, 172), "pine": Vector2(110, 185), "bench": Vector2(75, 46),
 		"barrel": Vector2(31, 45), "lamp": Vector2(34, 126), "car": Vector2(154, 83),
@@ -74,4 +76,4 @@ func _draw_wall() -> void:
 		var count := maxi(1, ceili(size.y / 64))
 		var height := size.y / count
 		for i in range(count):
-			draw_texture_rect_region(texture, Rect2(-size.x / 2, -size.y + i * height, size.x, height + .5), Rect2(0, 0, texture.get_width(), texture.get_height() * .14))
+			draw_texture_rect_region(texture, Rect2(-size.x / 2, -size.y + i * height, size.x, height + .5), Rect2(texture.get_width() * .25, texture.get_height() * .2, texture.get_width() * .5, texture.get_height() * .5))

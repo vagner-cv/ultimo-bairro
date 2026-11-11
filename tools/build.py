@@ -7,7 +7,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "builds"
 LOGS = BUILD / "logs"
-VERSION = "0.4.2"
+VERSION = "0.5.0"
 
 
 def run(name, arguments):
@@ -22,8 +22,8 @@ def run(name, arguments):
 
 
 def main():
-    if not (ROOT / "art/environment/house.png").exists():
-        raise SystemExit("Missing project artwork: art/environment/house.png")
+    if not (ROOT / "art/pixel/house_plaster.png").exists():
+        raise SystemExit("Missing project artwork: art/pixel/house_plaster.png")
     LOGS.mkdir(parents=True, exist_ok=True)
     (BUILD / ".gdignore").touch()
     run("import", ["--editor", "--import", "--quit"])
@@ -41,7 +41,7 @@ def main():
         for notice in ["FONT-LICENSE.txt", "GODOT-LICENSE.txt"]:
             shutil.copy(ROOT / "art" / notice, folder / notice)
         (folder / "LEIA-ME.txt").write_text(
-            "ÚLTIMO BAIRRO — PROTÓTIPO 0.4.2\n\n"
+            "ÚLTIMO BAIRRO — PROTÓTIPO 0.5.0\n\n"
             "Extraia todos os arquivos antes de jogar.\n"
             f"Abra {executable}. Não precisa instalar Godot.\n\n"
             "WASD ou setas: caminhar\nMouse: mirar\nBotão esquerdo: atirar (segure para repetir)\n"
@@ -57,7 +57,7 @@ def main():
             "Abra armários, gavetas e lixeiras com E. Corte caixas com a faca.\n"
             "Organize os itens no inventário; sem limite de carregamento.\n"
             "O conteúdo dos recipientes persiste durante a partida. Não há salvamento.\n\n"
-            "Arte pintada gerada para o projeto.\nMotor Godot; fontes DejaVu.\n"
+            "Pixel art gerada para o projeto.\nMotor Godot; fontes DejaVu.\n"
             "As licenças dessas dependências acompanham este pacote.\n",
             encoding="utf-8")
         package = BUILD / f"UltimoBairro-{VERSION}-{platform}.zip"

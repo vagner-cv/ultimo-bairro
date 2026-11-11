@@ -11,7 +11,7 @@ void fragment() {
  vec4 texel = texture(TEXTURE, UV);
  COLOR = texel * sprite_tint;
  if (selected) {
-  vec2 offset = TEXTURE_PIXEL_SIZE * 2.4;
+  vec2 offset = TEXTURE_PIXEL_SIZE;
   float edge = texture(TEXTURE, UV + vec2(offset.x, 0.0)).a;
   edge = max(edge, texture(TEXTURE, UV - vec2(offset.x, 0.0)).a);
   edge = max(edge, texture(TEXTURE, UV + vec2(0.0, offset.y)).a);
@@ -20,7 +20,7 @@ void fragment() {
   edge = max(edge, texture(TEXTURE, UV - offset).a);
   edge = max(edge, texture(TEXTURE, UV + vec2(offset.x, -offset.y)).a);
   edge = max(edge, texture(TEXTURE, UV + vec2(-offset.x, offset.y)).a);
-  float border = (1.0 - step(0.2, texel.a)) * edge * outline_color.a;
+  float border = (1.0 - step(0.5, texel.a)) * step(0.5, edge) * outline_color.a;
   if (border > COLOR.a) {
    COLOR = vec4(outline_color.rgb, border * sprite_tint.a);
   }

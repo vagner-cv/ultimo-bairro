@@ -5,6 +5,7 @@ const PROP = preload("res://src/world/prop.gd")
 const DOOR = preload("res://src/world/door.gd")
 const ROOF = preload("res://src/world/roof.gd")
 const SURVIVOR = preload("res://src/actors/survivor.gd")
+const FOLIAGE = preload("res://src/world/foliage.gd")
 const MAP_SIZE := Vector2(4608, 3072)
 const CELL: int = 32
 const ROAD_X := [960, 2464, 3776]
@@ -36,7 +37,7 @@ var spawn_points: Array[Vector2] = [
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	random.randomize()
 	actors = Node2D.new()
@@ -128,6 +129,16 @@ func _build_map() -> void:
 	for y in [900, 1810, 2440]:
 		for x in [120, 600, 1210, 1660, 2700, 3180, 3650, 4490]:
 			add_prop(Rect2(x, y, 20, 16), "tree")
+	# Orchard and park clusters leave the streets and all entrances accessible.
+	for p in [Vector2(1450, 2340), Vector2(1580, 2340), Vector2(1450, 2460), Vector2(1580, 2460)]:
+		var tree := add_prop(Rect2(p, Vector2(20, 16)), "tree")
+		if tree:
+			tree.variant = 7
+	for p in [Vector2(4080, 2360), Vector2(4290, 1880), Vector2(4490, 2380)]:
+		var tree := add_prop(Rect2(p, Vector2(20, 16)), "tree")
+		if tree:
+			tree.variant = 3
+	_plant_gardens()
 	# Street dressing uses the same detailed materials as interactive objects.
 	for p in [Vector2(460, 760), Vector2(2830, 730), Vector2(4160, 1650), Vector2(1320, 2640)]:
 		add_prop(Rect2(p, Vector2(126, 44)), "car")
@@ -148,6 +159,10 @@ func _build_map() -> void:
 
 func add_house(rect: Rect2, title: String, color: Color, starting: bool = false) -> void:
 	var door_x := rect.get_center().x
+	var residential_variant := 0
+	for house in houses:
+		if ART.building_type(house.name) == 0:
+			residential_variant += 1
 	houses.append({"rect": rect, "name": title, "door": Vector2(door_x, rect.end.y)})
 	add_prop(Rect2(rect.position, Vector2(rect.size.x, 14)), "wall", Color("a0a08a"))
 	add_prop(Rect2(rect.position, Vector2(14, rect.size.y)), "wall", Color("999b83"))
@@ -158,6 +173,7 @@ func add_house(rect: Rect2, title: String, color: Color, starting: bool = false)
 	door.set_script(DOOR)
 	door.position = Vector2(door_x, rect.end.y)
 	door.caption = title
+	door.variant = (houses.size() - 1) % 3
 	actors.add_child(door)
 	doors.append(door)
 	door.changed.connect(func() -> void:
@@ -197,7 +213,7 @@ func add_house(rect: Rect2, title: String, color: Color, starting: bool = false)
 	roof.size = rect.size
 	roof.house_name = title
 	roof.roof_color = color
-	roof.variant = (houses.size() - 1) % 5
+	roof.variant = residential_variant
 	roof.entry = door
 	door.changed.connect(roof.queue_redraw)
 	roofs.add_child(roof)
@@ -212,7 +228,7 @@ func add_prop(rect: Rect2, kind: String, color: Color = Color("84907b")) -> Stat
 	prop.position = Vector2(rect.get_center().x, rect.end.y)
 	prop.size = rect.size
 	prop.kind = kind
-	prop.variant = (absi(int(rect.position.x / 80) + int(rect.position.y / 64)) % 3) if kind == "tree" else houses.size() % 3
+	prop.variant = (absi(int(rect.position.x / 80) + int(rect.position.y / 64)) % ART.TREES.size()) if kind == "tree" else houses.size() % 3
 	prop.tint = color
 	prop.collision_layer = 16 if kind in ["bench", "crate", "barrel", "barricade", "sofa", "bed", "hospital_bed", "table", "armchair", "woodpile", "desk"] else 1
 	if prop.collision_layer == 16:
@@ -227,6 +243,39 @@ func add_prop(rect: Rect2, kind: String, color: Color = Color("84907b")) -> Stat
 	actors.add_child(prop)
 	solid_rects.append(rect)
 	return prop
+
+func _plant_gardens() -> void:
+	# Plants are decorative: only tree trunks/large hedges obstruct movement.
+	var garden_random := RandomNumberGenerator.new()
+	garden_random.seed = 73419
+	for index in range(houses.size()):
+		var house: Dictionary = houses[index]
+		for side in [-1, 1]:
+			for step in range(3):
+				var plant := FOLIAGE.new()
+				plant.position = Vector2(house.door.x + side * (57 + step * 26), house.rect.end.y + 30)
+				plant.variant = (index + step) % 6
+				plant.dimensions = Vector2(32, 28)
+				actors.add_child(plant)
+	for i in range(380):
+		var p := Vector2(garden_random.randf_range(50, MAP_SIZE.x - 50), garden_random.randf_range(50, MAP_SIZE.y - 50))
+		var blocked := false
+		for rx in ROAD_X:
+			if p.x > rx - 36 and p.x < rx + 196:
+				blocked = true
+		for ry in ROAD_Y:
+			if p.y > ry - 36 and p.y < ry + 196:
+				blocked = true
+		for house in houses:
+			if house.rect.grow(12).has_point(p) or absf(p.x - house.door.x) < 40:
+				blocked = true
+		if blocked:
+			continue
+		var plant := FOLIAGE.new()
+		plant.position = p.round()
+		plant.variant = 1 + i % 5
+		plant.dimensions = Vector2(19, 17) if i % 3 else Vector2(32, 28)
+		actors.add_child(plant)
 
 func set_player(player: Node2D) -> void:
 	for roof in roofs.get_children():

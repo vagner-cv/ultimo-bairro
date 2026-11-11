@@ -4,6 +4,7 @@ signal changed
 var is_open: bool = false
 var caption: String = "Porta"
 var collision: CollisionShape2D
+var variant: int = 0
 const KIT = preload("res://src/systems/environment_art.gd")
 
 func _ready() -> void:
@@ -31,4 +32,4 @@ func navigation_rect() -> Rect2:
 	return Rect2(position + Vector2(-28, -14), Vector2(56, 14))
 
 func _draw() -> void:
-	KIT.door(self, Vector2(-32, -64), is_open)
+	KIT.door(self, Vector2(-32, -64), is_open, variant)

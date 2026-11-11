@@ -1,6 +1,6 @@
 extends SceneTree
 
-const RIG = preload("res://src/systems/weapon_rig.gd")
+const ART = preload("res://src/systems/pixel_actor.gd")
 const FONT: Font = preload("res://art/regular.ttf")
 
 class Avatar extends Node2D:
@@ -10,12 +10,16 @@ class Avatar extends Node2D:
 	var walking: bool = false
 	var lift: float = 0
 	var kick: float = 0
+	var show_tip: bool = false
 	func _ready() -> void:
 		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	func _draw() -> void:
-		var orientation := RIG.orient(weapon, direction * 180 + Vector2(0, -40), frame, walking, lift)
-		var state := RIG.pose(weapon, orientation.direction, orientation.facing, frame, walking, lift, kick, orientation.lateral)
-		RIG.draw(self, state)
+		var row := ART.facing_for(direction)
+		var pose := ART.pose(weapon, row, frame, lift)
+		ART.draw(self, pose)
+		if show_tip:
+			draw_circle(pose.muzzle, 1, Color("fa5742"))
+
 
 class Sheet extends Node2D:
 	func _draw() -> void:
@@ -42,10 +46,29 @@ func capture() -> void:
 			avatar.weapon = weapons[row]
 			avatar.direction = directions[col]
 			avatar.position = Vector2(112 + col * 150, 175 + row * 165)
-			avatar.scale = Vector2(1.9, 1.9)
+			avatar.scale = Vector2(2, 2)
 			sheet.add_child(avatar)
 	await create_timer(.4).timeout
 	await RenderingServer.frame_post_draw
 	root.get_texture().get_image().save_png("res://builds/weapon-poses.png")
+	root.get_texture().get_image().save_png("res://docs/character-directions.png")
+	for frame in range(4):
+		for child in sheet.get_children():
+			child.frame = frame
+			child.show_tip = true
+			child.queue_redraw()
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://builds/weapon-poses-%d.png" % frame)
+	# Record a gait cycle, attack and jump using this exact renderer in Godot.
+	for tick in range(12):
+		for child in sheet.get_children():
+			child.frame = [1, 0, 2, 0][tick % 4] if tick < 8 else (3 if tick < 10 else 0)
+			child.lift = 12 if tick == 10 else 0
+			child.show_tip = false
+			child.queue_redraw()
+		await process_frame
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://builds/character-motion-%02d.png" % tick)
 	print("Saved weapon poses")
 	quit()

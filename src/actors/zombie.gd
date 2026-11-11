@@ -27,7 +27,7 @@ var outline: ShaderMaterial
 var targeted: bool = false
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	collision_layer = 4
 	collision_mask = 1 | 2 | 4 | 8 | 16
 	add_to_group("zombies")
@@ -41,8 +41,7 @@ func _ready() -> void:
 	body_sprite = Sprite2D.new()
 	body_sprite.texture = KIT.ZOMBIE_IDLE
 	body_sprite.hframes = 4
-	body_sprite.scale = Vector2(46.0 / 128, 69.0 / 192)
-	body_sprite.position = Vector2(0, -31.5)
+	body_sprite.position = Vector2(0, -34)
 	outline = ShaderMaterial.new()
 	outline.shader = preload("res://shaders/target_outline.gdshader")
 	body_sprite.material = outline

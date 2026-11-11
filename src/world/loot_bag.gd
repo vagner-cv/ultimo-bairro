@@ -1,6 +1,6 @@
 extends Node2D
 
-const ICON: Texture2D = preload("res://art/survival/loot.png")
+const ICON: Texture2D = preload("res://art/pixel/loot.png")
 const SHADOW = preload("res://src/systems/shadows.gd")
 var game: Node
 var inventory: RefCounted

@@ -189,7 +189,7 @@ func _draw_title(w: float, h: float) -> void:
 	text_at("01   EXPLORE O BAIRRO", Vector2(x + 26, 370), 12, PAPER, true)
 	text_at("02   ENCONTRE MARA", Vector2(x + 26, 409), 12, PAPER, true)
 	text_at("03   MANTENHA DISTÂNCIA", Vector2(x + 26, 448), 12, PAPER, true)
-	text_at("VERSÃO 0.4.2  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
+	text_at("VERSÃO 0.5.0  /  SOBREVIVÊNCIA", Vector2(92, h - 27), 10, MUTED)
 	text_at("WASD + MOUSE  ·  F11 TELA CHEIA", Vector2(w - 340, h - 27), 10, MUTED)
 
 func _draw_help(w: float, h: float) -> void:

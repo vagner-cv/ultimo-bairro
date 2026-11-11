@@ -2,18 +2,18 @@
 
 Protótipo de sobrevivência para PC em **Godot 4.6.3**. Explore Vila Aurora,
 converse com Mara e sobreviva a ondas crescentes de infectados.
-A versão **0.4.2** corrige a empunhadura: braços e mãos seguram as armas
-e acompanham a mira, o movimento, o recuo e o pulo.
+A versão **0.5.0** traz pixel art detalhada, personagem com animações completas
+em oito direções e mais variedade de casas, árvores, portas e jardins.
 
-![Partida com o cenário pintado integrado](docs/gameplay.png)
+![Partida com cenário e personagem em pixel art](docs/gameplay.png)
 
 ## Baixar e jogar
 
 Abra [Releases](https://github.com/vagner-cv/ultimo-bairro/releases) e baixe:
 
-- **Windows x64:** `UltimoBairro-0.4.2-Windows.zip`. Extraia tudo e abra
+- **Windows x64:** `UltimoBairro-0.5.0-Windows.zip`. Extraia tudo e abra
   `UltimoBairro.exe`.
-- **Linux x64:** `UltimoBairro-0.4.2-Linux.zip`. Extraia e execute
+- **Linux x64:** `UltimoBairro-0.5.0-Linux.zip`. Extraia e execute
   `./UltimoBairro.x86_64`. Se necessário, use `chmod +x UltimoBairro.x86_64`.
 
 Os executáveis não precisam de Godot, Python ou instalação de assets.
@@ -35,7 +35,7 @@ Esta entrega é para PC; ainda não há versão publicada para navegador.
 | Pular / subir em obstáculos baixos | Espaço |
 | Pistola / escopeta / fuzil / faca | 1 / 2 / 3 / 4 |
 | Usar erva verde (+45 de vida) | H |
-| Filtro suave / pixel clássico | F2 |
+| Filtro suave / pixel art nítida | F2 |
 | Pausa / encerrar conversa | Esc |
 | Ativar ou desativar áudio | M |
 | Tela cheia | F11 |
@@ -53,12 +53,15 @@ O fuzil abre a mira em rajadas e recupera precisão quando você para de dispara
 
 ![Mira e contorno do alvo na linha de tiro](docs/aim.png)
 
-As armas têm pontos próprios de empunhadura e apoio da segunda mão. A pistola,
-a escopeta e o fuzil acompanham os braços; a faca permanece na mão durante o
-golpe. A arma fica atrás do corpo quando o personagem aponta para longe da câmera.
-Os tiros e o clarão saem da ponta do cano.
+Corpo, braços, mãos e arma são desenhados juntos em cada quadro, com poses
+próprias para pistola, escopeta, fuzil e faca. O personagem tem **oito direções
+visuais**, mantendo o tiro livre em **360°**. Caminhada, disparo, golpe de faca
+e pulo usam o personagem completo; o clarão sai da ponta do cano do quadro atual.
+A filtragem nítida vem ativada; F2 alterna a suavização opcional.
 
-![Escopeta apoiada nas mãos dentro do jogo](docs/weapon-grip.png)
+![Escopeta segurada pelo novo personagem](docs/weapon-grip.png)
+![Quatro armas em oito direções, renderizadas no Godot](docs/character-directions.png)
+![Caminhada, ataque e pulo no renderer do jogo](docs/character-animation.gif)
 
 ## Escopo atual
 
@@ -76,10 +79,14 @@ Os tiros e o clarão saem da ponta do cano.
 - Inventário sem limite, com listas lado a lado para transferir quantidades,
   pegar tudo, guardar itens, equipar e usar ervas. A faca permanece com o jogador.
 - Pulo com altura e pouso sobre objetos baixos; paredes continuam bloqueando.
-- Arte pintada detalhada em terreno, asfalto, calçadas, pisos, fachadas e telhados.
-- Casas, lojas, prédios públicos e galpões com aparências próprias; interiores
-  mobiliados, árvores, cercas, carros abandonados e iluminação dos postes.
-- Leon em quatro direções, Mara e zumbis no mesmo acabamento visual dos itens.
+- Pixel art detalhada em personagens, itens, recipientes e cenário.
+- Oito aparências de construções: cinco casas, loja, clínica e galpão;
+  27 interiores mobiliados e três tipos de porta com estados aberto/fechado.
+- Oito espécies de árvores: carvalho, pinheiro, bétula, palmeira, salgueiro,
+  bordo de outono, árvore seca e frutífera. Arbustos, samambaias, flores,
+  lavanda, tufos de capim e vasos completam os jardins.
+- Sobrevivente loiro com jaqueta de couro inspirado no visual pedido de Leon,
+  Mara e zumbis no mesmo estilo dos itens.
 - Sombras suaves, hera nas fachadas e sinalização dos prédios.
 
 Você começa com pistola, 60 munições 9 mm, faca e uma erva. O armário da primeira
@@ -89,6 +96,7 @@ há salvamento entre sessões, multiplayer ou fome/sede.
 
 ![Inventário e conteúdo do armário](docs/inventory.png)
 ![Mapa ampliado de Vila Aurora](docs/map.png)
+![Vegetação do parque](docs/vegetation.png)
 
 ## Abrir o código no Godot
 
@@ -110,7 +118,7 @@ godot --headless --path . --editor --import --quit
 godot --headless --path . --fixed-fps 60 --script res://tests/run_tests.gd
 ```
 
-Há 146 verificações de gameplay, incluindo inventário, munições, loot, ondas,
+Há 154 verificações de gameplay, incluindo inventário, munições, loot, ondas,
 faca, salto, navegação, portas, diálogos, pausa e reinício. Para exportar, instale os modelos 4.6.3 em
 Editor → Gerenciar modelos de exportação e execute `python tools/build.py`.
 O comando valida, exporta Windows/Linux e monta ZIPs em `builds/` com os avisos
@@ -123,7 +131,7 @@ pela execução manual ou por uma tag `v*`.
 `src/systems/` armas/áudio/arte, e `src/ui/` a interface. As armas são configuradas
 em `resources/*.tres`; itens, inventário e loot ficam em `src/systems/`.
 
-- Arte pintada gerada para o projeto: `art/environment/` e `art/survival/`.
+- Pixel art gerada para o projeto: `art/pixel/`.
 - Fontes [DejaVu](art/FONT-LICENSE.txt) e motor [Godot](art/GODOT-LICENSE.txt).
 - [Arte e proveniência](art/README.md), [design](docs/DESIGN.md),
   [evolução](docs/ROADMAP.md) e [validação](docs/VALIDATION.md).

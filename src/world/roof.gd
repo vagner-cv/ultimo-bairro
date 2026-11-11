@@ -10,7 +10,7 @@ var fade: float = 1
 var variant: int = 0
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
 func _process(delta: float) -> void:
 	if not is_instance_valid(player):
@@ -20,7 +20,7 @@ func _process(delta: float) -> void:
 	modulate.a = fade
 
 func _draw() -> void:
-	var kind := ART.building_type(house_name)
+	var kind := ART.building_sprite(house_name, variant)
 	var texture: Texture2D = ART.BUILDINGS[kind]
 	# The footprint/door match physics; extra height represents the roof elevation.
 	var bounds := Rect2(-9, -58, size.x + 18, size.y + 58)
@@ -38,4 +38,4 @@ func _draw() -> void:
 	style.set_corner_radius_all(2)
 	draw_style_box(style, plate)
 	draw_string(font, plate.position + Vector2(7, 12), house_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e5dfc9"))
-	ART.door(self, Vector2(size.x / 2 - 32, size.y - 68), is_instance_valid(entry) and entry.is_open)
+	ART.door(self, Vector2(size.x / 2 - 32, size.y - 68), is_instance_valid(entry) and entry.is_open, entry.variant if is_instance_valid(entry) else 0)

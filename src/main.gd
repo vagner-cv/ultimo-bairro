@@ -21,7 +21,7 @@ var wave_countdown: float = -1
 var spawn_timer: float = 0
 var toast_message: String = ""
 var notification_time: float = 0
-var smooth_graphics: bool = true
+var smooth_graphics: bool = false
 var world: Node2D
 var player: CharacterBody2D
 var effects: Node2D
@@ -41,7 +41,7 @@ var started: bool = false
 var quitting: bool = false
 
 func _ready() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	get_tree().auto_accept_quit = false
 	_setup_inputs()
 	audio = AUDIO.new()
@@ -358,9 +358,9 @@ func toggle_map() -> void:
 	player.cooldown = maxf(player.cooldown, .25)
 
 func _apply_graphics() -> void:
-	world.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if smooth_graphics else CanvasItem.TEXTURE_FILTER_LINEAR
+	world.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth_graphics else CanvasItem.TEXTURE_FILTER_NEAREST
 	world.material = null
-	player.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	player.texture_filter = world.texture_filter
 	for object in world.actors.get_children() + world.roofs.get_children():
 		object.material = null
-		object.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS if smooth_graphics else CanvasItem.TEXTURE_FILTER_LINEAR
+		object.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR if smooth_graphics else CanvasItem.TEXTURE_FILTER_NEAREST
